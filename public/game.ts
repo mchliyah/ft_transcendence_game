@@ -1,38 +1,27 @@
 
-
 const canvas: HTMLCanvasElement = document.getElementById('canvas') as HTMLCanvasElement;
 const ctx: CanvasRenderingContext2D = canvas.getContext('2d') as CanvasRenderingContext2D;
 let windowWidth: number = window.innerWidth;
 let windowHeight: number = window.innerHeight;
 console.log(windowWidth, windowHeight);
 
-// const ws = new WebSocket('ws://localhost:3000');
+import('socket.io-client').then(io => {
+let ws = io('http://localhost:3000');
 
-// ws.onopen = () => {
-// 	  console.log('connected');
-// };
+ws.on('connect', () => {
+	console.log('Connected to server');
+});
 
-// ws.onclose = () => {
-// 	  console.log('disconnected');
-// };
+ws.on('disconnect', () => {
+	console.log('Disconnected from server');
+});
+  }).catch(error => {
+	console.log(error);
+  });
 
-// ws.onerror = (err) => {
-// 	  console.log('error: ', err);
-// };
 
-// ws.onmessage = (event) => {
-// 	const data = JSON.parse(event.data);
-// 	if (data.type === 'position') {
-// 		playerPaddle.y = data.y;
-// 	}
-// 	else if (data.type = 'ballPositionUpdate') {
-// 		ball.x = data.ball.x;
-// 		ball.y = data.ball.y;
-// 	}
-// 	else if (data.type = 'PaddleUpdate') {
-// 		computerPaddle.y = data.position;
-// 	}
-// };
+
+
 
 // Paddle properties
 const paddleWidth : number = 10;
@@ -143,14 +132,12 @@ function draw() {
 function someonelose() {
 if (rounds === 0) {
 	if (playerScore > computerScore) {
-		alert("You win!");
 		playerScore = 0;
 		computerScore = 0;
 	}
 	else {
 		playerScore = 0;
 		computerScore = 0;
-		alert("You lose!");
 	}
 	rounds = 3;
   }
@@ -194,7 +181,7 @@ function updatePlayerPaddlePosition() {
 	  type: 'updatePaddlePosition',
 	  position: playerPaddle.y,
 	};
-	// ws.send(JSON.stringify(message));
+	ws.send(JSON.stringify(message));
   }
 
 function update() {

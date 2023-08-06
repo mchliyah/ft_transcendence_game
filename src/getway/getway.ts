@@ -8,45 +8,32 @@ import {
 	WebSocketServer} from '@nestjs/websockets';
 import { Socket } from 'dgram';
 import { Server } from 'socket.io';
-// import { subscribe } from 'diagnostics_channel';
+
+interface BallPosition {
+	x: number;
+	y: number;
+}
+
 
 @WebSocketGateway()
 
 export class Mygetway implements OnModuleInit, OnGatewayConnection, OnGatewayDisconnect {
 
+	private BallPosition: BallPosition = {x : 0, y : 0};
 	@WebSocketServer()
-	server: Server
-	private ball: typeof ball;
-	private playerPaddle: typeof playerPaddle;
+	
+	server: Server;
 
-	constructor() {
-		this.ball = {
-			x: canvas.width / 2, // The ball's starting x-position
-			y: canvas.height / 2, // The ball's starting y-position
-			radius: 5,
-			dx: 3, // The ball's horizontal velocity
-			dy: 3 // The ball's vertical velocity
-		};
-
-		this.playerPaddle = {
-			x: canvas.width - paddleWidth - 10, // The player paddle's starting x-position
-			y: canvas.height / 2 - paddleHeight / 2, // The player paddle's starting y-position
-			width: paddleWidth,	
-			height: paddleHeight,
-			dy: 0 // The player paddle's vertical velocity
-		};
-	}
 
 	onModuleInit() {
 		this.server.on('connection', (socket) => {
 			console.log('New connection on socket id: ', socket.id);
 
 		});
-		this.updatePositions();
 	}
 
-	handleConnection(socket: Socket) {
-		socket.emit('initialePosition', {ball: this.ball, playerPaddle: this.playerPaddle});
+	handleConnection(Client: Socket) {
+		this.server.emit('BallPosition', {ball: this.BallPosition});
 	}
 
 	handleDisconnect() {
@@ -55,17 +42,18 @@ export class Mygetway implements OnModuleInit, OnGatewayConnection, OnGatewayDis
 	});
 	}
 
-	@SubscribeMessage('moeve paddle')
+	@SubscribeMessage('move paddle')
 	
-	onMovePaddle(@MessageBody() position: number) {
-		this.playerPaddle.y = position;
-	}
-
-	updatePositions() {
-		// Update the ball's position
-		this.server.emit('position', {ball: this.ball, playerPaddle: this.playerPaddle});
-		setTimeout(() => this.updatePositions(), 1000 / 60); // 60 frames per second
-	}
+	  // Handle ball position update from the client
+	  @SubscribeMessage('updateBallPosition')
+	  handleUpdateBallPosition(@MessageBody() data: BallPosition) {
+		// Update the ball position in the backend
+		this.BallPosition = data;
+	
+		// Broadcast the updated ball position to all connected clients
+		this.server.emit('BallPositionUpdate', { ball: this.BallPosition });
+		console.log('Ball position updated: ', this.BallPosition);
+	  }
 
 	@SubscribeMessage('replay message')
 	onReplayMessage(@MessageBody() body: any) {
