@@ -28,6 +28,7 @@ export class Mygetway implements OnModuleInit, OnGatewayConnection, OnGatewayDis
 	onModuleInit() {
 		this.server.on('connection', (socket) => {
 			console.log('New connection on socket id: ', socket.id);
+			console.log(`${JSON.stringify(socket.client.request.headers, undefined, 4)}`);
 		});
 	}
 
@@ -39,6 +40,13 @@ export class Mygetway implements OnModuleInit, OnGatewayConnection, OnGatewayDis
 		this.server.on('disconnect', (socket) => {
 		console.log('Client disconnected: ', socket.id);
 	});
+	}
+
+	printdata() {
+		this.server.on('message', (arg) => {
+			let message	= JSON.parse(arg);
+			console.log(`data = ${message.playerPaddle.y}`);
+		})
 	}
 
 	@SubscribeMessage('move paddle')
