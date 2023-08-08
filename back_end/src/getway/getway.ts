@@ -28,7 +28,6 @@ export class Mygetway implements OnModuleInit, OnGatewayConnection, OnGatewayDis
 	onModuleInit() {
 		this.server.on('connection', (socket) => {
 			console.log('New connection on socket id: ', socket.id);
-
 		});
 	}
 
