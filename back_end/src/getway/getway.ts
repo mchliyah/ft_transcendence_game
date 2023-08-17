@@ -14,6 +14,27 @@ interface BallPosition {
 	y: number;
 }
 
+interface Paddle {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+	dy: number;
+}
+
+interface Ball {
+	x: number;
+	y: number;
+	radius: number;
+	dx: number;
+	dy: number;
+}
+
+interface GameData {
+	playerPaddle: Paddle;
+	computerPaddle: Paddle;
+	ball: Ball;
+}
 
 @WebSocketGateway()
 
@@ -27,47 +48,34 @@ export class Mygetway implements OnModuleInit, OnGatewayConnection, OnGatewayDis
 
 	onModuleInit() {
 		this.server.on('connection', (socket) => {
-			console.log('New connection on socket id: ', socket.id);
-			console.log(`${JSON.stringify(socket.client.request.headers, undefined, 4)}`);
+			console.log('New connection on socket id: ', socket.id);//print the message on conssole when the client connected 
+			// console.log(`${JSON.stringify(socket.client.request.headers, undefined, 4)}`);
 		});
 	}
 
 	handleConnection(Client: Socket) {
-		this.server.emit('BallPosition', {ball: this.BallPosition});
+		//this.server.emit('BallPosition', {ball: this.BallPosition});
 	}
 
 	handleDisconnect() {
 		this.server.on('disconnect', (socket) => {
-		console.log('Client disconnected: ', socket.id);
+		console.log('Client disconnected: ', socket.id); //print the message on conssole when the client disconnected 
 	});
 	}
 
-	printdata() {
-		this.server.on('message', (arg) => {
-			let message	= JSON.parse(arg);
-			console.log(`data = ${message.playerPaddle.y}`);
-		})
+	@SubscribeMessage('updateGameData') // Decorate with the event name from the frontend
+	handleUpdateGameData(client: any, data: GameData) {
+
+	  console.log('Received game data:');
+	//   console.log('Received game data:', data);
+  
+	  // broadcast the data to all clients except the sender
+	  client.broadcast.emit('gameDataUpdated', data);
 	}
 
-	@SubscribeMessage('move paddle')
-	
-	  // Handle ball position update from the client
-	  @SubscribeMessage('updateBallPosition')
-	  handleUpdateBallPosition(@MessageBody() data: BallPosition) {
-		// Update the ball position in the backend
-		this.BallPosition = data;
-	
-		// Broadcast the updated ball position to all connected clients
-		this.server.emit('BallPositionUpdate', { ball: this.BallPosition });
-		console.log('Ball position updated: ', this.BallPosition);
-	  }
-
-	@SubscribeMessage('replay message')
-	onReplayMessage(@MessageBody() body: any) {
-		console.log(body);
-		this.server.emit('onreplay', {
-			msg : 'reply message',
-			content: body,
-		});
-	}
+	// @SubscribeMessage('updateGameData')
+	// handleupdateGameData(@MessageBody() data: GameData) {
+	// 	console.log('updateGameData');
+	// 	// console.log(data);
+	// }
 }

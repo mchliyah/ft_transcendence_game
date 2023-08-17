@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {io} from 'socket.io-client';
+import drawPaddle  from './draw';
 
 interface Paddle {
 	x: number;
@@ -39,11 +40,6 @@ function useEffectOnce(effect: React.EffectCallback) {
 		}
 	}, []);
 }
-
-function drawPaddle(x: number, y: number, width: number, height: number, color: string, ctx: CanvasRenderingContext2D) {
-	ctx.fillStyle = color;
-	ctx.fillRect(x, y, width, height);
-}
   
 function drawBall(ctx: CanvasRenderingContext2D, ball: Ball) {
 	ctx.beginPath();
@@ -64,6 +60,22 @@ function resetGame(ball: Ball, playerPaddle: Paddle, computerPaddle: Paddle, can
 	// Reset ball velocity
 	ball.dx = Math.random() > 0.5 ? 3 : -3; // Randomize the horizontal velocity
 	ball.dy = Math.random() > 0.5 ? 3 : -3; // Randomize the vertical velocity
+}
+
+async function SendGamedata(ws: MySocket, playerPaddle: Paddle, computerPaddle: Paddle, ball: Ball) {
+	const gameData = {
+		playerPaddle,
+		computerPaddle,
+		ball,
+	};
+
+	const message = {
+		type: 'updateGameData',
+		data: gameData,
+	  };
+	ws?.send(JSON.stringify(message));
+	// console.log("sending data to server", message);
+	// ws?.send(JSON.stringify(message));
 }
   
   
@@ -86,19 +98,10 @@ function draw(ws: MySocket, ctx: CanvasRenderingContext2D, canvas: HTMLCanvasEle
 	drawPaddle(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height, 'green', ctx);
 	drawPaddle(computerPaddle.x, computerPaddle.y, computerPaddle.width, computerPaddle.height, 'red', ctx);
 	drawBall(ctx, ball);
-	update(ball, playerPaddle, computerPaddle, canvas);
-	updatePlayerPaddlePosition(ws, playerPaddle);
+	update(ws,ball, playerPaddle, computerPaddle, canvas);
+	// updatePlayerPaddlePosition(ws, playerPaddle);
 	requestAnimationFrame(() => { draw(ws, ctx, canvas, ball, playerPaddle, computerPaddle); });
   }
-  
-
-function	updatePlayerPaddlePosition(ws: MySocket, playerPaddle: Paddle){
-	  const message = {
-		  type: 'updatePaddlePosition',
-		  position: playerPaddle.y,
-	  };
-	  ws?.send(JSON.stringify(message));
-}
 
 function someonelose() {
 	if (rounds === 0) {
@@ -145,10 +148,9 @@ function ballCollision(ball: Ball, playerPaddle: Paddle, computerPaddle: Paddle,
   
 
   
-function update(ball: Ball, playerPaddle: Paddle, computerPaddle: Paddle, canvas: HTMLCanvasElement) {
-	// Your logic to update the player's paddle position
+function update(ws: MySocket, ball: Ball, playerPaddle: Paddle, computerPaddle: Paddle, canvas: HTMLCanvasElement) {
 	
-	// Send the player's paddle position to the backend
+	
 
 	if (Date.now() - lastSpeedIncrease > interval) {
 		lastSpeedIncrease = Date.now();
@@ -173,11 +175,12 @@ function update(ball: Ball, playerPaddle: Paddle, computerPaddle: Paddle, canvas
 	ball.x += ball.dx;
 	ball.y += ball.dy;
 
+	SendGamedata(ws, playerPaddle, computerPaddle, ball);
+
 	// Check ball collision with top and bottom walls
 	if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
 	ball.dy *= -1; // Reverse the vertical velocity of the ball
 	}
-
 	// Check ball collision with player and computer paddles
 	ballCollision(ball, playerPaddle, computerPaddle, canvas);
 }
@@ -187,7 +190,7 @@ const Game = () => {
 	const [ws, setWs] = useState<null | MySocket>(null);
 	
 	useEffectOnce(() => {
-		setWs(io('http://10.11.3.6:8000',
+		setWs(io('http://localhost:8000',
 		{
 			withCredentials: true,
 			forceNew: true,
