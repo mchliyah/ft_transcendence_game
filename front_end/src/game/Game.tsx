@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {io} from 'socket.io-client';
-import { drawPaddle, drawBall, resetGame }  from './draw';
+import { drawPaddle, drawBall }  from './draw';
 // import { Socket } from 'socket.io-client';
 
 type MySocket = ReturnType<typeof io>;
@@ -26,6 +26,29 @@ export interface GameData {
 	ball: Ball;
 }
 
+let ball: Ball = {
+	x: 0,
+	y: 0, 
+	radius: 0,
+	dx: 0, // The ball's horizontal velocity
+	dy: 0 // The ball's vertical velocity
+};
+let playerPaddle: Paddle = {
+	x: 0,
+	y: 0,
+	width: 10,
+	height: 80,
+	dy: 0
+};
+
+let computerPaddle: Paddle = {
+	x: 0,
+	y: 0,
+	width: 10,
+	height: 80,
+	dy: 0
+};
+
 // // Paddle properties
 const paddleSpeed : number = 5;
 
@@ -41,7 +64,7 @@ function useEffectOnce(effect: React.EffectCallback) {
 
 async function updatePlayerPaddlePosition(ws: MySocket, playerPaddle: Paddle) {
 	ws?.emit('UpdateGameData', { playerPaddle });
-	// console.log("sending data to server", message);
+	// console.log("sending data to server"d , message);
 	// ws?.send(JSON.stringify(message));
 }
 
@@ -54,46 +77,8 @@ function draw(ws: MySocket, ctx: CanvasRenderingContext2D, canvas: HTMLCanvasEle
 	drawPaddle(computerPaddle.x, computerPaddle.y, computerPaddle.width, computerPaddle.height, 'red', ctx);
 	drawBall(ctx, ball);
 	update(ws,ball, playerPaddle, computerPaddle, canvas);
-	// updatePlayerPaddlePosition(ws, playerPaddle);
-	ws.on('UpdateData', (data : GameData) => {
-		console.log('ballposition', data);
-		ball = data.ball;
-		playerPaddle = data.playerPaddle;
-		computerPaddle = data.computerPaddle;
-	}
-	);
+
 	requestAnimationFrame(() => { draw(ws, ctx, canvas, ball, playerPaddle, computerPaddle); });
-}
-
-
-function ballCollision(ball: Ball, playerPaddle: Paddle, computerPaddle: Paddle, canvas: HTMLCanvasElement)
-{
-	
-	if (
-	ball.x + ball.radius >= playerPaddle.x &&
-	ball.y >= playerPaddle.y &&
-	ball.y < playerPaddle.y + playerPaddle.height
-	){
-		ball.dx *= -1; // Reverse the horizontal velocity of the ball
-	} else if (
-		ball.x - ball.radius <= computerPaddle.x + computerPaddle.width &&
-		ball.y >= computerPaddle.y &&
-	  ball.y < computerPaddle.y + computerPaddle.height
-	  ) {
-		  ball.dx *= -1; // Reverse the horizontal velocity of the ball
-		} else if (ball.x + ball.radius > playerPaddle.x + playerPaddle.width) {
-			// Player misses the ball
-			// rounds--;
-			// computerScore++;
-			// someonelose();
-			resetGame(ball, playerPaddle, computerPaddle, canvas);
-		} else if (ball.x - ball.radius < computerPaddle.x - computerPaddle.width) {
-			// Computer misses the ball
-			// rounds--;
-			// playerScore++;
-			// someonelose();
-			resetGame(ball, playerPaddle, computerPaddle, canvas);
-		}
 }
 
 function update(ws: MySocket, ball: Ball, playerPaddle: Paddle, computerPaddle: Paddle, canvas: HTMLCanvasElement) 
@@ -104,7 +89,7 @@ function update(ws: MySocket, ball: Ball, playerPaddle: Paddle, computerPaddle: 
 	// 		ball.dy += ball.dy > 0 ? increaseSpeed : -increaseSpeed;
 	// }
 	// Update paddle positions based on their velocity
-	playerPaddle.y += playerPaddle.dy;
+	// playerPaddle.y += playerPaddle.dy;
 	
 	// Update computer paddle position to track the ball
 	if (computerPaddle.y < ball.y) {
@@ -115,47 +100,22 @@ function update(ws: MySocket, ball: Ball, playerPaddle: Paddle, computerPaddle: 
 		computerPaddle.dy = 0; // Stop the computer paddle
 	}
 	
-	computerPaddle.y += computerPaddle.dy;
-	
-	// Update ball position
-	// ball.x += ball.dx;
-	// ball.y += ball.dy;
-	
-	// Check ball collision with top and bottom walls
-	if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
-		ball.dy *= -1; // Reverse the vertical velocity of the ball
+	// computerPaddle.y += computerPaddle.dy;
+
+	updatePlayerPaddlePosition(ws, playerPaddle);
+	ws.on('UpdateData', (data : GameData) => {
+		// console.log('ballposition', data);
+		ball = data.ball;
+		// playerPaddle = data.playerPaddle;
+		computerPaddle = data.computerPaddle;
 	}
-	// Check ball collision with player and computer paddles
-	// ballCollision(ball, playerPaddle, computerPaddle, canvas);
+	);
 }
 	
 const Game = () => {
 	const canvasRef = useRef<null | HTMLCanvasElement>(null);
 	const [ws, setWs] = useState<null | MySocket>(null);
 	const [broadcastMessage, setBroadcastMessage] = useState<string | null>(null);
-	
-	let ball: Ball = {
-		x: 0,
-		y: 0, 
-		radius: 0,
-		dx: 0, // The ball's horizontal velocity
-		dy: 0 // The ball's vertical velocity
-	};
-	let playerPaddle: Paddle = {
-		x: 0,
-		y: 0,
-		width: 0,
-		height: 0,
-		dy: 0
-	};
-
-	let computerPaddle: Paddle = {
-		x: 0,
-		y: 0,
-		width: 10,
-		height: 80,
-		dy: 0
-	};
 
 	useEffectOnce(() => {
 		setWs(io('http://localhost:8000',
