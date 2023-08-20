@@ -1,4 +1,5 @@
 import { OnModuleInit } from '@nestjs/common';
+// import * as canvas from 'canvas';
 import {
 	MessageBody,
 	OnGatewayConnection,
@@ -8,11 +9,6 @@ import {
 	WebSocketServer} from '@nestjs/websockets';
 import { Socket } from 'dgram';
 import { Server } from 'socket.io';
-
-interface BallPosition {
-	x: number;
-	y: number;
-}
 
 interface Paddle {
 	x: number;
@@ -36,11 +32,41 @@ interface GameData {
 	ball: Ball;
 }
 
+let playerScore : number = 0;
+let computerScore : number = 0;
+let rounds : number = 3;
+let interval : number = 1000;
+let lastSpeedIncrease : number = 0;
+let increaseSpeed : number = 0.2;
+
 @WebSocketGateway()
 
 export class Mygetway implements OnModuleInit, OnGatewayConnection, OnGatewayDisconnect {
 
-	private BallPosition: BallPosition = {x : 0, y : 0};
+	private computerPaddle: Paddle = { 
+		x: 10,
+		y: 300 / 2 - 50 / 2,
+		width: 10,
+		height: 50,
+		dy: 0, 
+	};
+
+	private playerPaddle: Paddle = { 
+		x: 600 - 20,
+		y: 300 / 2 - 50 / 2,
+		width: 10,
+		height: 50,
+		dy: 0, 
+	};
+
+	private ball: Ball = { 
+		x: 600 / 2,
+		y: 300 / 2,
+		radius: 5,
+		dx: 3,
+		dy: 3 
+	};
+
 	@WebSocketServer()
 	
 	server: Server;
@@ -55,6 +81,13 @@ export class Mygetway implements OnModuleInit, OnGatewayConnection, OnGatewayDis
 
 	handleConnection(Client: Socket) {
 		//this.server.emit('BallPosition', {ball: this.BallPosition});
+		console.log("connected !!");
+		const gameData: GameData = {
+			playerPaddle: this.playerPaddle,
+			computerPaddle: this.computerPaddle,
+			ball: this.ball,
+		};
+		this.server.emit('InitGame', gameData);
 	}
 
 	handleDisconnect() {
@@ -63,19 +96,16 @@ export class Mygetway implements OnModuleInit, OnGatewayConnection, OnGatewayDis
 	});
 	}
 
-	@SubscribeMessage('updateGameData') // Decorate with the event name from the frontend
-	handleUpdateGameData(client: any, data: GameData) {
-
-	  console.log('Received game data:');
-	//   console.log('Received game data:', data);
-  
-	  // broadcast the data to all clients except the sender
-	  client.broadcast.emit('gameDataUpdated', data);
+	@SubscribeMessage('UpdateGameData') // Decorate with the event name from the frontend
+	handleUpdateGameData(client: any, data: Paddle) {
+	console.log('Received game data:', data);
+	  this.playerPaddle = data;
+		const gameData: GameData = {
+			playerPaddle: this.playerPaddle,
+			computerPaddle: this.computerPaddle,
+			ball: this.ball,
+		};
+		this.server.emit('UpdateData', gameData);
+		// client.broadcast.emit('UpdateData', gameData);
 	}
-
-	// @SubscribeMessage('updateGameData')
-	// handleupdateGameData(@MessageBody() data: GameData) {
-	// 	console.log('updateGameData');
-	// 	// console.log(data);
-	// }
 }
