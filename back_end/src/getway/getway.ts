@@ -131,6 +131,8 @@ export class Mygetway implements OnModuleInit, OnGatewayConnection, OnGatewayDis
 	handleConnection(Client: Socket) {
 		//this.server.emit('BallPosition', {ball: this.BallPosition});
 		console.log("connected !!");
+		ball.x = 300;
+		ball.y = 150;
 		const gameData: GameData = {
 			playerPaddle: playerPaddle,
 			computerPaddle: computerPaddle,

@@ -27,23 +27,23 @@ export interface GameData {
 }
 
 let ball: Ball = {
-	x: 0,
-	y: 0, 
-	radius: 0,
-	dx: 0, // The ball's horizontal velocity
-	dy: 0 // The ball's vertical velocity
+	x: 300,
+	y: 150, 
+	radius: 5,
+	dx: 3, // The ball's horizontal velocity
+	dy: 3 // The ball's vertical velocity
 };
 let playerPaddle: Paddle = {
-	x: 0,
-	y: 0,
+	x: 600 - 20,
+	y: 300 / 2 -50 /2,
 	width: 10,
 	height: 80,
 	dy: 0
 };
 
 let computerPaddle: Paddle = {
-	x: 0,
-	y: 0,
+	x: 10,
+	y: 300 / 2 - 50  / 2,
 	width: 10,
 	height: 80,
 	dy: 0
@@ -75,13 +75,13 @@ function draw(ws: MySocket, ctx: CanvasRenderingContext2D, canvas: HTMLCanvasEle
 	// drawRounds(ctx, canvas);
 	drawPaddle(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height, 'green', ctx);
 	drawPaddle(computerPaddle.x, computerPaddle.y, computerPaddle.width, computerPaddle.height, 'red', ctx);
-	drawBall(ctx, ball);
-	update(ws,ball, playerPaddle, computerPaddle, canvas);
+	// drawBall(ctx, ball);
+	update(ws,ball, playerPaddle, computerPaddle, canvas, ctx);
 
 	requestAnimationFrame(() => { draw(ws, ctx, canvas, ball, playerPaddle, computerPaddle); });
 }
 
-function update(ws: MySocket, ball: Ball, playerPaddle: Paddle, computerPaddle: Paddle, canvas: HTMLCanvasElement) 
+function update(ws: MySocket, ball: Ball, playerPaddle: Paddle, computerPaddle: Paddle, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) 
 {
 	// if (Date.now() - lastSpeedIncrease > interval) {
 	// 		lastSpeedIncrease = Date.now();
@@ -91,7 +91,7 @@ function update(ws: MySocket, ball: Ball, playerPaddle: Paddle, computerPaddle: 
 	// Update paddle positions based on their velocity
 	// playerPaddle.y += playerPaddle.dy;
 	
-	// Update computer paddle position to track the ball
+	// Update computer paddle position to track the ball 
 	if (computerPaddle.y < ball.y) {
 		computerPaddle.dy = paddleSpeed; // Move the computer paddle down
 	} else if (computerPaddle.y > ball.y) {
@@ -110,6 +110,7 @@ function update(ws: MySocket, ball: Ball, playerPaddle: Paddle, computerPaddle: 
 		computerPaddle = data.computerPaddle;
 	}
 	);
+	drawBall(ctx, ball);
 }
 	
 const Game = () => {
