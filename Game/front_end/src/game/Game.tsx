@@ -57,8 +57,8 @@ function updatePlayerPaddlePosition(ws: MySocket, playerPaddle: Paddle) {
 function draw(ws: MySocket, ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, ball: Ball, playerPaddle: Paddle, computerPaddle: Paddle) {
 	// Clear the canvas
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	drawScore(ctx, canvas);
-	drawRounds(ctx, canvas);
+	// drawScore(ctx, canvas);
+	// drawRounds(ctx, canvas);
 	drawPaddle(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height, 'green', ctx);
 	drawPaddle(computerPaddle.x, computerPaddle.y, computerPaddle.width, computerPaddle.height, 'red', ctx);
 	// drawBall(ctx, ball);
@@ -147,13 +147,13 @@ const Game = () => {
 	
 	
 	
-	function drawScore(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
-		ctx.font = '32px Courier New';
-		ctx.fillText(playerScore.toString(), canvas.width / 2 + 40, 50);
-		ctx.fillText(computerScore.toString(), canvas.width / 2 - 60, 50);
-	}
+	// function drawScore(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
+	// 	ctx.font = '32px Courier New';
+	// 	ctx.fillText(playerScore.toString(), canvas.width / 2 + 40, 50);
+	// 	ctx.fillText(computerScore.toString(), canvas.width / 2 - 60, 50);
+	// }
 	  
-	function drawRounds(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
-		ctx.font = '32px Courier New';
-		ctx.fillText(rounds.toString(), canvas.width / 2 - 10, 50);
-	}
+	// function drawRounds(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
+	// 	ctx.font = '32px Courier New';
+	// 	ctx.fillText(rounds.toString(), canvas.width / 2 - 10, 50);
+	// }
