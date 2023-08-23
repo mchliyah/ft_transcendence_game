@@ -7,7 +7,7 @@ function drawPaddle(x: number, y: number, width: number, height: number, color: 
 }
 
 function drawBall(ctx: CanvasRenderingContext2D, ball: Ball) {
-	console.log("drawBall", ball.x, ball.y, ball.radius);
+	// console.log('ball in draw ball ', ball);
 	ctx.beginPath();
 	ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
 	ctx.fillStyle = 'black';
