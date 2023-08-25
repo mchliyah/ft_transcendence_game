@@ -56,6 +56,9 @@ function resetGame(ball: Ball, playerPaddle: Paddle, computerPaddle: Paddle) {
     computerPaddle.x = 10;
     computerPaddle.y = 300 / 2 - 50 / 2;
     computerPaddle.dy = 3;
+	// rounds = 3;
+	// playerScore = 0;
+	// computerScore = 0;
 
 }
 
@@ -66,7 +69,7 @@ async function ballCollision(ball: Ball, playerPaddle: Paddle, computerPaddle: P
 		ball.y >= playerPaddle.y &&
 		ball.y < playerPaddle.y + playerPaddle.height
 		){
-			console.log("player hit the ball");
+			// console.log("player hit the ball");
 			// const hitpoint = ball.y - (playerPaddle.y + playerPaddle.height / 2);
 			// ball.dy = hitpoint * 0.2;
 			const hitpoint = (ball.y - playerPaddle.y) / playerPaddle.height;
@@ -76,9 +79,9 @@ async function ballCollision(ball: Ball, playerPaddle: Paddle, computerPaddle: P
 		ball.x - ball.radius <= computerPaddle.x + computerPaddle.width &&
 		ball.y >= computerPaddle.y &&
 		ball.y < computerPaddle.y + computerPaddle.height) {
-			console.log("computer hit the ball");
+			// console.log("computer hit the ball");
 			// const hitpoint = ball.y - (computerPaddle.y + computerPaddle.height / 2);
-			const hitpoint = (ball.y - playerPaddle.y) / playerPaddle.height;
+			const hitpoint = (ball.y - computerPaddle.y) / computerPaddle.height;
 			ball.dy = (hitpoint - 0.5) * 8;
 			ball.dx *= -1; // Reverse the horizontal velocity of the ball
 	} else if (ball.x + ball.radius > playerPaddle.x) {
@@ -86,14 +89,14 @@ async function ballCollision(ball: Ball, playerPaddle: Paddle, computerPaddle: P
 		rounds--;
 		computerScore++;
 		// someonelose();
-		console.log("player miss the ball");
+		// console.log("player miss the ball");
 		resetGame(ball, playerPaddle, computerPaddle,);
 	} else if (ball.x - ball.radius < computerPaddle.x) {
 		// Computer misses the ball
 		rounds--;
 		playerScore++;
 		// someonelose();
-		console.log("computer miss the ball");
+		// console.log("computer miss the ball");
 		resetGame(ball, playerPaddle, computerPaddle);
 	}
 }

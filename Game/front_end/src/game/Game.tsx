@@ -7,9 +7,9 @@ import { Ball, Paddle, GameData } from '../../../Types';
 
 export type MySocket = ReturnType<typeof io>;
 
-let playerScore : number;
-let computerScore : number;
-let rounds: number;
+let playerScore : number = 0;
+let computerScore : number = 0;
+let rounds: number = 3;
 
 let ball: Ball = {
 	x: 300,
@@ -35,6 +35,20 @@ let computerPaddle: Paddle = {
 	dy: 0
 };
 
+
+	
+	
+function drawScore(playerScore: number, computerScore : number, ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
+	ctx.font = '32px Courier New';
+	ctx.fillText(playerScore.toString(), canvas.width / 2 + 100, 50);
+	ctx.fillText(computerScore.toString(), canvas.width / 2 - 100, 50);
+}
+//   
+function drawRounds(rounds : number, ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
+	ctx.font = '32px Courier New';
+	ctx.fillText(rounds.toString(), canvas.width / 2 - 10, 50);
+}
+
 // // Paddle properties
 const paddleSpeed : number = 5;
 
@@ -57,36 +71,23 @@ function updatePlayerPaddlePosition(ws: MySocket, playerPaddle: Paddle) {
 function draw(ws: MySocket, ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, ball: Ball, playerPaddle: Paddle, computerPaddle: Paddle) {
 	// Clear the canvas
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	// drawScore(ctx, canvas);
-	// drawRounds(ctx, canvas);
 	drawPaddle(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height, 'green', ctx);
 	drawPaddle(computerPaddle.x, computerPaddle.y, computerPaddle.width, computerPaddle.height, 'red', ctx);
-	// drawBall(ctx, ball);
 	update(ws,ball, playerPaddle, computerPaddle, canvas, ctx);
+	drawBall(ctx, ball);
+	drawRounds(rounds, ctx, canvas);
+	drawScore(playerScore, computerScore , ctx, canvas);
 
 	requestAnimationFrame(() => { draw(ws, ctx, canvas, ball, playerPaddle, computerPaddle); });
 }
 
 function update(ws: MySocket, ball: Ball, playerPaddle: Paddle, computerPaddle: Paddle, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) 
 {
-	
-	
-	// Update computer paddle position to track the ball 
-	// if (computerPaddle.y < ball.y) {
-	// 	computerPaddle.dy = paddleSpeed; // Move the computer paddle down
-	// } else if (computerPaddle.y > ball.y) {
-	// 	computerPaddle.dy = -paddleSpeed; // Move the computer paddle up
-	// } else {
-	// 	computerPaddle.dy = 0; // Stop the computer paddle
-	// }
-	
-	// computerPaddle.y += computerPaddle.dy;
+
+	// Update the ball's position
 	updatePlayerPaddlePosition(ws, playerPaddle);
+	//listen to socket events to update data
 	ws.on('UpdateData', (data : GameData) => {
-		// console.log('ballposition', data);
-		// const newball : Ball = data.ball;
-		// ball = {...data.ball};
-		// ball = Object.assign({}, data.ball);
 		ball.x = data.ball.x;
 		ball.y = data.ball.y;
 		ball.dy = data.ball.dy;
@@ -94,13 +95,12 @@ function update(ws: MySocket, ball: Ball, playerPaddle: Paddle, computerPaddle: 
 		playerScore = data.playerScore;
 		computerScore = data.computerScore;
 		rounds = data.rounds;
-		// playerPaddle = data.playerPaddle;
-		// computerPaddle = data.computerPaddle;
 		computerPaddle.y = data.computerPaddle.y;
 	}
 	);
-	// console.log('revieved ball data frome server ', ball);
-	drawBall(ctx, ball);
+	// drawRounds(rounds, ctx, canvas);
+	// drawScore(playerScore, computerScore, ctx, canvas);
+
 }
 	
 const Game = () => {
@@ -145,15 +145,3 @@ const Game = () => {
 	
 	//react componnent life cycle , useffect usestate useref
 	
-	
-	
-	// function drawScore(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
-	// 	ctx.font = '32px Courier New';
-	// 	ctx.fillText(playerScore.toString(), canvas.width / 2 + 40, 50);
-	// 	ctx.fillText(computerScore.toString(), canvas.width / 2 - 60, 50);
-	// }
-	  
-	// function drawRounds(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
-	// 	ctx.font = '32px Courier New';
-	// 	ctx.fillText(rounds.toString(), canvas.width / 2 - 10, 50);
-	// }

@@ -30,6 +30,7 @@ function ListenOnSocket(ws : MySocket, ball : Ball , computerPaddle : Paddle)
         console.log('InitGame', gameData);
             ball = gameData.ball;
             computerPaddle = gameData.computerPaddle;
+			// rounds = gameData.rounds;
         }
         );
         
