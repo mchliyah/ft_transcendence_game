@@ -22,16 +22,16 @@ let ball: Ball = {
 let playerPaddle: Paddle = {
 	x: 600 - 20,
 	y: 300 / 2 -50 /2,
-	width: 10,
-	height: 80,
+	width: 5,
+	height: 60,
 	dy: 0
 };
 
 let computerPaddle: Paddle = {
 	x: 10,
 	y: 300 / 2 - 50  / 2,
-	width: 10,
-	height: 80,
+	width: 5,
+	height: 60,
 	dy: 0
 };
 
@@ -126,7 +126,7 @@ const Game = () => {
 			
 			// Handle keyboard events to control the player paddle
 			ListenOnSocket(ws, ball, computerPaddle); // socket events 
-			SetEventLisners(playerPaddle, canvas, paddleSpeed); // keyboard and mouse events 
+			SetEventLisners(playerPaddle, canvas, paddleSpeed); // keyboard and mouse events
 			// Start the game loop
 			draw(ws, ctx, canvas, ball, playerPaddle, computerPaddle);
 		}

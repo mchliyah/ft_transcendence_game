@@ -21,6 +21,8 @@ function SetEventLisners(playerPaddle: Paddle , canvas : HTMLCanvasElement, padd
         const canvasRect = canvas.getBoundingClientRect();
         const mouseY = event.clientY - canvasRect.top;
         playerPaddle.y = mouseY - playerPaddle.height / 2;
+        playerPaddle.y = Math.max(playerPaddle.y, 0); // Ensure it's not less than 0
+        playerPaddle.y = Math.min(playerPaddle.y, 300 - playerPaddle.height);
     });
 }
 

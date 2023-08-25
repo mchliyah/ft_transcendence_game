@@ -11,16 +11,16 @@ import { Server } from 'socket.io';
 let computerPaddle: Paddle = { 
 	x: 10,
 	y: 300 / 2 - 50 / 2,
-	width: 10,
-	height: 50,
+	width: 5,
+	height: 60,
 	dy: 0, 
 };
 
 let playerPaddle: Paddle = { 
 	x: 600 - 20,
 	y: 300 / 2 - 50 / 2,
-	width: 10,
-	height: 80,
+	width: 5,
+	height: 60,
 	dy: 0,
 };
 
@@ -156,15 +156,17 @@ export class Mygetway implements OnModuleInit, OnGatewayConnection, OnGatewayDis
 			computerPaddle.dy += computerPaddle.dy > 0 ? increaseSpeed : -increaseSpeed;
 		}
 		// Update paddle positions based on their velocity
-
-		ballCollision(ball, playerPaddle, computerPaddle);
-
-		// calculate computer paddle position on canvas
 		if (ball.y > computerPaddle.y + computerPaddle.height / 2) {
 		computerPaddle.y += computerPaddle.dy;
 		} else {
 			computerPaddle.y -= computerPaddle.dy;
 		}
+		computerPaddle.y = Math.max(computerPaddle.y, 0);
+    	computerPaddle.y = Math.min(computerPaddle.y, 300 - computerPaddle.height); 
+
+		ballCollision(ball, playerPaddle, computerPaddle);
+
+		// calculate computer paddle position on canvas
 		// calculate player paddle position on canvas
 		const gameData: GameData = {
 			playerPaddle: playerPaddle,
