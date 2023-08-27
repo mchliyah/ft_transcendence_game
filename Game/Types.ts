@@ -16,7 +16,7 @@ export interface Ball {
 }
 export interface GameData {
 	playerPaddle: Paddle;
-	computerPaddle: Paddle;
+	otherpaddle: Paddle;
 	ball: Ball;
 	playerScore: number;
 	computerScore: number;

@@ -1,37 +1,42 @@
 import { GameData, Paddle, Ball } from "../../../Types";
 import { MySocket } from "./Game";
+import { Dispatch , SetStateAction} from "react";
 
-function SetEventLisners(playerPaddle: Paddle , canvas : HTMLCanvasElement, paddleSpeed : number)
+function SetEventLisners(setplayerpaddle: Dispatch<SetStateAction<Paddle>> , canvas : HTMLCanvasElement, paddleSpeed : number)
 {
     window.addEventListener('keydown', (event) => {
         if (event.code === 'ArrowUp') {
-            playerPaddle.dy = -paddleSpeed; // Move the player paddle up
-        } else if (event.code === 'ArrowDown') {
-            playerPaddle.dy = paddleSpeed; // Move the player paddle down
+			setplayerpaddle(prev=>{ prev.dy = -paddleSpeed; return prev}); // move paddle up 
+		} else if (event.code === 'ArrowDown') {
+            setplayerpaddle(prev=>{ prev.dy = paddleSpeed; return prev}); // move paddle down
         }
     });
     
     window.addEventListener('keyup', (event) => {
         if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
-            playerPaddle.dy = 0; // Stop the player paddle
+			setplayerpaddle(prev=>{ prev.dy = 0; return prev}); // stop paddle
         }
     });
     
     canvas.addEventListener('mousemove', (event : any) => {
         const canvasRect = canvas.getBoundingClientRect();
         const mouseY = event.clientY - canvasRect.top;
-        playerPaddle.y = mouseY - playerPaddle.height / 2;
-        playerPaddle.y = Math.max(playerPaddle.y, 0); // Ensure it's not less than 0
-        playerPaddle.y = Math.min(playerPaddle.y, 300 - playerPaddle.height);
-    });
+		setplayerpaddle(prev=>{
+			let y = prev.y;
+			y = mouseY - prev.height / 2;
+			y = Math.max(y, 0); // Ensure it's not less than 0
+			y = Math.min(y, 300 - prev.height); // Ensure it's not greater than canvas height - paddle height
+			prev.y = y;
+			return prev});
+	});
 }
 
-function ListenOnSocket(ws : MySocket, ball : Ball , computerPaddle : Paddle)
+function ListenOnSocket(ws : MySocket, ball : Ball , otherpaddle : Paddle)
 {
     ws.on('InitGame', (gameData : GameData) => {
         console.log('InitGame', gameData);
             ball = gameData.ball;
-            computerPaddle = gameData.computerPaddle;
+            otherpaddle = gameData.otherpaddle;
 			// rounds = gameData.rounds;
         }
         );
