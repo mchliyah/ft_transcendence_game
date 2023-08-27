@@ -61,32 +61,29 @@ function useEffectOnce(effect: React.EffectCallback) {
 	}, []);
 }
 
-function draw(ws: MySocket, ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, ball: Ball, playerPaddle: Paddle, otherpaddle: Paddle, setBall: React.Dispatch<React.SetStateAction<Ball>>) {
+function draw(ws: MySocket, ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, ball: Ball, playerPaddle: Paddle, otherpaddle: Paddle, setBall: React.Dispatch<React.SetStateAction<Ball>>, setOtherPlayerpadle : React.Dispatch<React.SetStateAction<Paddle>>) {
 	// Clear the canvas
 	// console.log('playerPaddle in draw ', playerPaddle);
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	drawPaddle(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height, 'green', ctx);
 	drawPaddle(otherpaddle.x, otherpaddle.y, otherpaddle.width, otherpaddle.height, 'red', ctx);
-	update(ws,ball, otherpaddle, setBall);
+	update(ws,ball, otherpaddle, setBall, setOtherPlayerpadle);
 	drawBall(ctx, ball);
 	drawRounds(rounds, ctx, canvas);
 	drawScore(playerScore, computerScore , ctx, canvas);
 
-	requestAnimationFrame(() => { draw(ws, ctx, canvas, ball, playerPaddle, otherpaddle, setBall); });
+	requestAnimationFrame(() => { draw(ws, ctx, canvas, ball, playerPaddle, otherpaddle, setBall, setOtherPlayerpadle); });
 }
 
-function update(ws: MySocket, ball: Ball, otherpaddle: Paddle, setBall: React.Dispatch<React.SetStateAction<Ball>>)
+function update(ws: MySocket, ball: Ball, otherpaddle: Paddle, setBall: React.Dispatch<React.SetStateAction<Ball>>, setOtherPlayerpadle : React.Dispatch<React.SetStateAction<Paddle>>)
 {
 	//listen to socket events to update data
 	ws.on('UpdateData', (data : GameData) => {
-		ball.x = data.ball.x;
-		ball.y = data.ball.y;
-		ball.dy = data.ball.dy;
-		ball.dx = data.ball.dx;
+		setBall(data.ball);
 		playerScore = data.playerScore;
 		computerScore = data.computerScore;
 		rounds = data.rounds;
-		otherpaddle.y = data.otherpaddle.y;
+		setOtherPlayerpadle(prev=>{prev.dy = data.otherpaddle.dy; return prev});
 	}
 	);
 	// drawRounds(rounds, ctx, canvas);
@@ -126,6 +123,7 @@ const Game = () => {
         const canvas = canvasRef.current;
         if (canvas) {
             SetEventLisners(setplayerpaddle, canvas, paddleSpeed);
+			setOtherPlayerpadle(otherpaddle);
         }
     }, []);
 
@@ -147,7 +145,7 @@ const Game = () => {
 			// Handle keyboard events to control the player paddle
 			ListenOnSocket(ws, ball, otherpaddle); // socket events 
 			// Start the game loop
-			draw(ws, ctx, canvas, ball, playerPaddle, otherpaddle, setBall);
+			draw(ws, ctx, canvas, ball, playerPaddle, otherpaddle, setBall, setOtherPlayerpadle);
 		}
 	}, [ws])
 	
