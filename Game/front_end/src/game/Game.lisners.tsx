@@ -9,12 +9,12 @@ function SetEventLisners(setplayerpaddle: Dispatch<SetStateAction<Paddle>> , can
 			setplayerpaddle(prev=>{ prev.dy = -paddleSpeed; return prev}); // move paddle up 
 		} else if (event.code === 'ArrowDown') {
             setplayerpaddle(prev=>{ prev.dy = paddleSpeed; return prev}); // move paddle down
-        }
+        } // to be changed 
     });
     
     window.addEventListener('keyup', (event) => {
         if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
-			setplayerpaddle(prev=>{ prev.dy = 0; return prev}); // stop paddle
+			setplayerpaddle(prev=>{ prev.dy = 0; return prev}); // stop paddle to be changed 
         }
     });
     
@@ -22,12 +22,12 @@ function SetEventLisners(setplayerpaddle: Dispatch<SetStateAction<Paddle>> , can
         const canvasRect = canvas.getBoundingClientRect();
         const mouseY = event.clientY - canvasRect.top;
 		setplayerpaddle(prev=>{
-			let y = prev.y;
-			y = mouseY - prev.height / 2;
-			y = Math.max(y, 0); // Ensure it's not less than 0
-			y = Math.min(y, 300 - prev.height); // Ensure it's not greater than canvas height - paddle height
-			prev.y = y;
-			return prev});
+			const paddle = {...prev};
+			paddle.y = mouseY - paddle.height / 2;
+			paddle.y = Math.max(paddle.y, 0); // Ensure it's not less than 0
+			paddle.y = Math.min(paddle.y, 300 - paddle.height); // Ensure it's not greater than canvas height -
+			// console.log('prev in mousemove ', paddle);
+			return paddle;});
 	});
 }
 

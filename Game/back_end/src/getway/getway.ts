@@ -123,7 +123,6 @@ export class Mygetway implements OnModuleInit, OnGatewayConnection, OnGatewayDis
 
 	handleConnection(Client: Socket) {
 		//this.server.emit('BallPosition', {ball: this.BallPosition});
-		console.log("connected as " + Client + " , and  number of players: " + players.length);
 		if (players.length < 2) {
 			const playerId = players.length + 1;
 			const playerpad = playerId === 1 ? playerPaddle : otherpaddle;
@@ -191,8 +190,10 @@ export class Mygetway implements OnModuleInit, OnGatewayConnection, OnGatewayDis
 				computerScore: computerScore,
 				rounds: rounds,
 			};
-			this.server.emit('UpdateData', gameData);
-			// client.broadcast.emit('UpdateData', gameData);
+			console.log("sending init data to " + player + " contain ");
+			console.log(gameData);
+			// this.server.emit('UpdateData', gameData);
+			client.broadcast.emit('UpdateData', gameData);
 		}
 	}
 }
