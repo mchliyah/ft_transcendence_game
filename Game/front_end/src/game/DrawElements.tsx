@@ -1,31 +1,34 @@
 import { Paddle, Ball } from "../../../Types";
+import { ctxrend, cnvelem, ballstat, paddlestat, gamestat, Action } from "../../Game.types";
+import { playerScore, computerScore, rounds } from "./Game";
 
-
-function drawPaddle(x: number, y: number, width: number, height: number, color: string, ctx: CanvasRenderingContext2D) {
+function drawPaddle(paddle: Paddle, color: string, ctx: ctxrend, canvas: cnvelem) {
 	ctx.fillStyle = color;
-	ctx.fillRect(x, y, width, height);
+	ctx.clearRect(paddle.x, 0, paddle.width, canvas.height);
+	ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
 }
 
-function drawBall(ctx: CanvasRenderingContext2D, ball: Ball) {
-	// console.log('ball in draw ball ', ball);
+function drawBall(ctx: ctxrend, ball: Ball) {
+	ctx.clearRect(ball.x - ball.radius, ball.y - ball.radius, ball.radius * 2, ball.radius * 2);
 	ctx.beginPath();
 	ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-	ctx.fillStyle = 'black';
+	ctx.fillStyle = 'blue';
 	ctx.fill();
 	ctx.closePath();
 }
 
-	
-	
-// function drawScore(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
-	// ctx.font = '32px Courier New';
-	// ctx.fillText(playerScore.toString(), canvas.width / 2 + 40, 50);
-	// ctx.fillText(computerScore.toString(), canvas.width / 2 - 60, 50);
-// }
-  
-// function drawRounds(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
-	// ctx.font = '32px Courier New';
-	// ctx.fillText(rounds.toString(), canvas.width / 2 - 10, 50);
-// }
+function drawScore(playerScore: number, computerScore : number, ctx: ctxrend, canvas: cnvelem) {
+	ctx.font = '32px Courier New';
+	ctx.clearRect(canvas.width / 2 - 100, 0, 200, 50);
+	ctx.clearRect(canvas.width / 2 + 100, 0, 200, 50);
+	ctx.fillText(playerScore.toString(), canvas.width / 2 + 100, 50);
+	ctx.fillText(computerScore.toString(), canvas.width / 2 - 100, 50);
+}
+// Draw the number of rounds
+function drawRounds(rounds : number, ctx: ctxrend, canvas: cnvelem) {
+	ctx.font = '32px Courier New';
+	ctx.clearRect(canvas.width / 2 - 10, 0, 20, 50);
+	ctx.fillText(rounds.toString(), canvas.width / 2 - 10, 50);
+}
 
-export { drawBall, drawPaddle};
+export { drawBall, drawPaddle, drawScore, drawRounds};

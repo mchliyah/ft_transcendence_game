@@ -1,55 +1,68 @@
-import React, { useEffect, useRef, useState } from 'react';
-import {io} from 'socket.io-client';
-import { drawPaddle, drawBall }  from './DrawElements';
-import { SetEventLisners, ListenOnSocket} from './Game.lisners';
+
+import React, { useEffect, useReducer, useRef } from 'react';
+import { io, Socket } from 'socket.io-client';
+import { drawPaddle, drawBall, drawRounds, drawScore } from './DrawElements';
+import { SetEventLisners, ListenOnSocket } from './Game.lisners';
 import { Ball, Paddle, GameData } from '../../../Types';
-// import { Socket } from 'socket.io-client';
+import { ctxrend, cnvelem, initialState, State, Action, InitBall, InitPlayerPaddle, initotherpaddle, InitGame} from '../../Game.types';
 
 export type MySocket = ReturnType<typeof io>;
 
-let playerScore : number = 0;
-let computerScore : number = 0;
+let playerScore: number = 0;
+let computerScore: number = 0;
 let rounds: number = 3;
 
-const initialBall: Ball = {
-	x: 300,
-	y: 150, 
-	radius: 5,
-	dx: 3, // The ball's horizontal velocity
-	dy: 3 // The ball's vertical velocity
+const paddleSpeed: number = 5;
+
+export const gameReducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case 'SET_WS':
+      return { ...state, ws: action.payload };
+    case 'SET_PLAYER_PADDLE':
+      return { ...state, playerPaddle: action.payload };
+    case 'SET_OTHER_PADDLE':
+      return { ...state, otherPaddle: action.payload };
+    case 'SET_BALL':
+		{
+			// console.log('ball data ', action.payload);
+			return { ...state, ball: action.payload };
+		}
+    case 'SET_GAME_DATA':
+      return { ...state, gameData: action.payload };
+    default:
+      return state;
+  }
 };
 
-const  initialPlayerPaddle: Paddle = {
-	x: 600 - 20,
-	y: 300 / 2 -50 /2,
-	width: 5,
-	height: 60,
-	dy: 3
-};
-
-const initotherpaddle: Paddle = {
-	x: 10,
-	y: 300 / 2 - 50  / 2,
-	width: 5,
-	height: 60,
-	dy: 3
-};
-
-
-// Draw the score
-function drawScore(playerScore: number, computerScore : number, ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
-	ctx.font = '32px Courier New';
-	ctx.fillText(playerScore.toString(), canvas.width / 2 + 100, 50);
-	ctx.fillText(computerScore.toString(), canvas.width / 2 - 100, 50);
+function draw(ws: MySocket, ctx: ctxrend, canvas: cnvelem, ball: Ball, playerPaddle: Paddle, otherpaddle: Paddle) {
+	if (playerPaddle){
+		update(ws, playerPaddle);
+		ctx.clearRect(playerPaddle.x, 0, playerPaddle.width, canvas.height);
+		drawPaddle(playerPaddle, 'green', ctx, canvas);
+	}
+	if (otherpaddle)
+	{
+		ctx.clearRect(otherpaddle.x, 0, otherpaddle.width, canvas.height);
+		drawPaddle(otherpaddle, 'red', ctx, canvas);
+	}
+	if (ball)
+		drawBall(ctx, ball);
+	if (rounds)
+	{
+		ctx.clearRect(canvas.width / 2 - 10, 0, 20, canvas.height);
+		drawRounds(rounds, ctx, canvas);
+	}
+	if (playerScore && computerScore)
+		drawScore(playerScore, computerScore , ctx, canvas);
+	requestAnimationFrame(() => { draw(ws, ctx, canvas, ball, playerPaddle, otherpaddle); });
 }
-// Draw the number of rounds
-function drawRounds(rounds : number, ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
-	ctx.font = '32px Courier New';
-	ctx.fillText(rounds.toString(), canvas.width / 2 - 10, 50);
-}
 
-// // Paddle properties
-const paddleSpeed : number = 5;
+function update(ws: MySocket, playerPaddle: Paddle)
+{
+	//emiting player padlle position to evey farame rendred to make sure server emit back update 
+	ws.emit('UpdatePadlle', playerPaddle);
+	// console.log('player paddle position ', playerPaddle.payload);
+}
 
 function useEffectOnce(effect: React.EffectCallback) {
 	let ref = useRef(false);
@@ -61,123 +74,66 @@ function useEffectOnce(effect: React.EffectCallback) {
 	}, []);
 }
 
-function draw(ws: MySocket, ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, ball: Ball, playerPaddle: Paddle, otherpaddle: Paddle, setBall: React.Dispatch<React.SetStateAction<Ball>>, setOtherPlayerpadle : React.Dispatch<React.SetStateAction<Paddle>>) {
-	// Clear the canvas
-	// console.log('ball position in draw ', ball);
-	// console.log('playerPaddle in draw ', playerPaddle);
-	// ctx.clearRect(ball.x - 5, ball.y - 5, ball.x + 5, ball.y + 5);
-	ctx.clearRect(20, 0, canvas.width - 60, canvas.height);
-	drawPaddle(otherpaddle.x, otherpaddle.y, otherpaddle.width, otherpaddle.height, 'red', ctx);
-	drawBall(ctx, ball);
-	drawRounds(rounds, ctx, canvas);
-	drawScore(playerScore, computerScore , ctx, canvas);
-	update(ws, setBall, setOtherPlayerpadle);
+const Game: React.FC = () => {
+  const canvasRef = useRef<cnvelem | null>(null);
 
-	requestAnimationFrame(() => { draw(ws, ctx, canvas, ball, playerPaddle, otherpaddle, setBall, setOtherPlayerpadle); });
-}
+  const [state, dispatch] = useReducer(gameReducer, initialState);
 
-function update(ws: MySocket, setBall: React.Dispatch<React.SetStateAction<Ball>>, setOtherPlayerpadle : React.Dispatch<React.SetStateAction<Paddle>>)
-{
-	//listen to socket events to update data
-	ws.on('UpdateData', (data : GameData) => {
-		console.log('data in update ', data);
-		setBall(data.ball);
-		playerScore = data.playerScore;
-		computerScore = data.computerScore;
-		rounds = data.rounds;
-		setOtherPlayerpadle(prev=>{prev.dy = data.otherpaddle.dy; return prev});
-	}
-	);
-	// drawRounds(rounds, ctx, canvas);
-	// drawScore(playerScore, computerScore, ctx, canvas);
+  const setupSocket = () => {
+	console.log('connecting');
+    const wsInstance = io('http://localhost:5432', {
+      withCredentials: true,
+      forceNew: true,
+      timeout: 100000,
+      transports: ['websocket']
+    });
+    dispatch({ type: 'SET_WS', payload: wsInstance });
+  };
 
-}
-	
-const Game = () => {
-	// const [broadcastMessage, setBroadcastMessage] = useState<string | null>(null);
-	const canvasRef = useRef<HTMLCanvasElement>(null);
-	const [ws, setWs] = useState<null | MySocket>(null);
-	// try usestate in ws
-    const [playerPaddle, setplayerpaddle] = useState<Paddle>(initialPlayerPaddle);
-    const [otherpaddle, setOtherPlayerpadle] = useState<Paddle>(initotherpaddle);
-    const [ball, setBall] = useState<Ball>(initialBall);
-    const [gameData, setGameData] = useState<GameData | null>(null);
-	let ctx: CanvasRenderingContext2D = canvasRef.current?.getContext('2d') as CanvasRenderingContext2D;
-	
-	useEffectOnce(() => {
-		setWs(io('http://localhost:5243',
-		{
-			withCredentials: true,
-			forceNew: true,
-			timeout: 100000, //before connect_error and connect_timeout are emitted.
-			transports: ['websocket'],
-		}))
-	});[ws]
-	
-	const onLoadEvent = (element:HTMLCanvasElement) => {
-		if (ws){
-			ListenOnSocket(ws, ball, otherpaddle);
-			ctx = element?.getContext('2d') as CanvasRenderingContext2D;
-			draw(ws, ctx, element, ball, playerPaddle, otherpaddle, setBall, setOtherPlayerpadle);
-			drawPaddle(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height, 'green', ctx);
-		}
-	}
-	useEffect(() => {
-        // Update player paddle position on server when it changes locally
-        ws?.emit('UpdatePadlle', playerPaddle);
-		if (ctx)
-		{
-			ctx.clearRect(playerPaddle.x, 0, playerPaddle.width, ctx.canvas.height);
-			drawPaddle(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height, 'green', ctx);
-		}
-    }, [playerPaddle]);
-
-	useEffect(() => {
+	const setupEventListeners = () => {
 		const canvas = canvasRef.current;
-		console.log('ws in useeffect ', ws);
-		const handleIntersection :IntersectionObserverCallback = (entries) => {
-		  const [entry] = entries;
-		  if (entry.isIntersecting) {
-			const theCanvas = entry.target as HTMLCanvasElement;
-			onLoadEvent(theCanvas);
-			SetEventLisners(setplayerpaddle, theCanvas, paddleSpeed);
-			setOtherPlayerpadle(initotherpaddle);
-		  }
-		};
-	
-		const options = {
-		  root: null, // Use the viewport as the root
-		  rootMargin: '0px', // Margin around the root
-		  threshold: 0.5, // The ratio of the element's visibility needed to trigger the callback
-		};
-	
-		const observer = new IntersectionObserver(handleIntersection, options);
 		if (canvas) {
-		  observer.observe(canvas);
-		}
-		return () => {
-		  observer.disconnect();
-		};
-    }, []);
+			SetEventLisners( (newPaddle) => dispatch({ type: 'SET_PLAYER_PADDLE', payload: newPaddle }), canvas, paddleSpeed );
+    }
+  };
 
-	useEffect(() => {
-        // Update local game data when received from server
-        if (gameData) {
-            setBall(gameData.ball);
-            // Update other game data properties
-			setOtherPlayerpadle(gameData.otherpaddle);
-        }
-    }, [gameData]);
+	const updateGameFromServer = () => {
+		if (state.gameData) {
+			dispatch({ type: 'SET_BALL', payload: state.gameData.ball });
+			dispatch({ type: 'SET_OTHER_PADDLE', payload: state.gameData.otherpaddle });
+			playerScore = state.gameData.playerScore;
+			computerScore = state.gameData.computerScore;
+			rounds = state.gameData.rounds;
+		}
+	};
+
 	
-	return (
-		<center> 
-			<canvas ref={canvasRef}  width={600} height={300} />
-		</center> 
-		);
-		
-	}
-	
-	export default Game;
-	
-	//react componnent life cycle , useffect usestate useref
-	
+	const updateCanvas = () => {
+		if (canvasRef.current && state.ws) {
+			const canvas = canvasRef.current;
+			const ctx: ctxrend = canvas.getContext('2d') as ctxrend;
+			
+			// console.log('clearing canvas');
+			ListenOnSocket( state, state.ws, dispatch, playerScore, computerScore, rounds );
+			// ctx.clearRect(0, 0, canvas.width, canvas.height);
+			draw(state.ws, ctx, canvas, state.ball, state.playerPaddle, state.otherPaddle);
+		}
+  };
+
+  useEffectOnce(() => {
+	//set up socket and listners
+    setupSocket();
+    setupEventListeners();
+  });
+
+  useEffect(updateGameFromServer, [state.gameData]);
+  useEffect(updateCanvas, [state.ws, state.playerPaddle, state.otherPaddle, state.ball]);
+
+  return (
+    <center>
+      <canvas ref={canvasRef} width={600} height={300} />
+    </center>
+  );
+};
+
+export default Game;
