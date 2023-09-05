@@ -4,7 +4,7 @@ import { MySocket } from "./Game";
 import { Action } from "../../Game.types";
 import { Dispatch , SetStateAction} from "react";
 import { initialPlayerPaddle , State} from "../../Game.types";
-import { gameReducer } from "./Game";
+import { Score } from "./Game";
 
 function SetEventLisners(
 	dispatch: React.Dispatch<Action>,
@@ -47,12 +47,15 @@ function SetEventLisners(
 	});
   }
 
-function ListenOnSocket(state : State, ws: MySocket, dispatch: React.Dispatch<Action>, playerScore: number, computerScore: number, rounds: number ) {
-	ws.on('InitGame', (gameData: GameData) => {
+function ListenOnSocket(state : State, ws: MySocket, dispatch: React.Dispatch<Action>, score: Score, rounds: number ) {
+	ws.on('InitGame', (ball : Ball, otherPaddle : Paddle, playerScore: number, computerScore: number, rounds: number) => {
 	//   console.log('InitGame', gameData);
-	  dispatch({ type: 'SET_BALL', payload: gameData.ball });
-	  dispatch({ type: 'SET_OTHER_PADDLE', payload: gameData.otherpaddle });
-	  dispatch({ type: 'SET_GAME_DATA', payload: gameData });
+	  dispatch({ type: 'SET_BALL', payload: ball });
+	  dispatch({ type: 'SET_OTHER_PADDLE', payload: otherPaddle });
+	//   dispatch({ type: 'SET_GAME_DATA', payload: gameData });
+	  score.playerScore = playerScore;
+	  score.computerScore = computerScore;
+	  rounds = rounds;
 	});
   
 	ws.on('connect', () => {
@@ -71,17 +74,21 @@ function ListenOnSocket(state : State, ws: MySocket, dispatch: React.Dispatch<Ac
 	  console.log('Received update:', message);
 	  // Handle the received update message as needed
 	});
+	ws.on('JoinRoom', (message: string) => {
+		console.log('JoinRoom', message);
+	});
   
-	ws.on('UpdateData', (data: GameData) => {
+	ws.on('StartGame', (message: string) => {
+		console.log('StartGame on room', message); // print the start game message	
+	});
 
-		// playerScore = data.playerScore;
-		// computerScore = data.computerScore;
-		// rounds = data.rounds;
-		// let ball = {...data.ball};
-		// let otherpaddle = {...data.otherpaddle};
-		// dispatch({ type: 'SET_BALL' ,payload: ball });
-		// dispatch({type: 'SET_OTHER_PADDLE', payload: otherpaddle});
-		dispatch({ type: 'SET_GAME_DATA', payload: data });
+	ws.on('SET_OTHER_PADDLE', (paddle: Paddle) => {
+		console.log('SET_OTHER_PADDLE', paddle); // print the other paddle position
+		dispatch({ type: 'SET_OTHER_PADDLE', payload: paddle }); // set the other paddle position based on the server
+	})
+
+	ws.on('SET_BALL', (ball: Ball) => {
+		dispatch({ type: 'SET_BALL', payload: ball }); // set the ball position based on the server
 	})
 }
 

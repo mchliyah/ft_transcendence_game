@@ -32,14 +32,14 @@ const initalotherpaddle: Paddle = {
 	dy: 3,
 };
 
-const InialtGame: GameData = {
-	playerPaddle: initialPlayerPaddle,
-	otherpaddle: initalotherpaddle,
-	ball: initialBall,
-	playerScore: 0,
-	computerScore: 0,
-	rounds: 3,
-};
+// const InialtGame: GameData = {
+// 	playerPaddle: initialPlayerPaddle,
+// 	otherpaddle: initalotherpaddle,
+// 	ball: initialBall,
+// 	playerScore: 0,
+// 	computerScore: 0,
+// 	rounds: 3,
+// };
 
 const InitBall: Action = {
 	type: 'SET_BALL',
@@ -57,10 +57,10 @@ const initotherpaddle: Action = {
 };
 
 
-const InitGame: Action = {
-	type: 'SET_GAME_DATA',
-	payload: InialtGame,
-};
+// const InitGame: Action = {
+// 	type: 'SET_GAME_DATA',
+// 	payload: InialtGame,
+// };
 
 
 interface State {
@@ -68,7 +68,6 @@ interface State {
 	playerPaddle: Paddle;
 	otherPaddle: Paddle;
 	ball: Ball;
-	gameData: GameData;
 }
 
 type Action =
@@ -83,7 +82,7 @@ const initialState: State = {
 	playerPaddle: initialPlayerPaddle,
 	otherPaddle: initotherpaddle,
 	ball: initialBall,
-	gameData: InitGame
+	// gameData: InitGame
 };
 
 export {initialState, InitBall, InitPlayerPaddle, initotherpaddle, InitGame};
