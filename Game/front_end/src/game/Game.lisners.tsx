@@ -47,11 +47,11 @@ function SetEventLisners(
 	});
   }
 
-function ListenOnSocket(state : State, ws: MySocket, dispatch: React.Dispatch<Action>, score: Score, rounds: number ) {
-	ws.on('InitGame', (ball : Ball, otherPaddle : Paddle, playerScore: number, computerScore: number, rounds: number) => {
+function ListenOnSocket(ws: MySocket, dispatch: React.Dispatch<Action>, score: Score, rounds: number ) {
+	ws.on('InitGame', (ball : Ball, paddle : Paddle, playerScore: number, computerScore: number, rounds: number) => {
 	//   console.log('InitGame', gameData);
 	  dispatch({ type: 'SET_BALL', payload: ball });
-	  dispatch({ type: 'SET_OTHER_PADDLE', payload: otherPaddle });
+	  dispatch({ type: 'SET_PLAYER_PADDLE', payload: paddle });
 	//   dispatch({ type: 'SET_GAME_DATA', payload: gameData });
 	  score.playerScore = playerScore;
 	  score.computerScore = computerScore;
@@ -87,8 +87,11 @@ function ListenOnSocket(state : State, ws: MySocket, dispatch: React.Dispatch<Ac
 		dispatch({ type: 'SET_OTHER_PADDLE', payload: paddle }); // set the other paddle position based on the server
 	})
 
-	ws.on('SET_BALL', (ball: Ball) => {
-		dispatch({ type: 'SET_BALL', payload: ball }); // set the ball position based on the server
+	ws.on('UPDATE', (ball: Ball, other: Paddle) => {
+		console.log('UPDATE ball ', ball);
+		console.log('UPDATE paddle ', other);
+		dispatch({ type: 'SET_BALL', payload: ball });
+		dispatch({ type: 'SET_OTHER_PADDLE', payload: other });
 	})
 }
 

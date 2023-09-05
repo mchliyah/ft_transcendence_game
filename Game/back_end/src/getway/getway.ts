@@ -1,10 +1,10 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import {
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
+	OnGatewayConnection,
+	OnGatewayDisconnect,
+	SubscribeMessage,
+	WebSocketGateway,
+	WebSocketServer,
 } from '@nestjs/websockets';
 import { Socket } from 'dgram';
 import { Ball, Paddle, GameData } from '../../../Types';
@@ -14,24 +14,24 @@ import { Console } from 'console';
 import { emit } from 'process';
 
 interface Player {
-  id: number;
-  socket: Socket;
-  paddle: Paddle;
-  room: string;
+	id: number;
+	socket: Socket;
+	paddle: Paddle;
+	room: string;
 }
 
 class Room {
 	players: Player[] = [];
 	ball: Ball = defaultBall;
 	roomName: string = "";
-  }
+	}
 
 const defaultPaddle: Paddle = {
-  x: 10,
-  y: 300 / 2 - 50 / 2,
-  width: 5,
-  height: 60,
-  dy: 3,
+	x: 10,
+	y: 300 / 2 - 50 / 2,
+	width: 5,
+	height: 60,
+	dy: 3,
 };
 
 const defaultOtherPaddle: Paddle = {
@@ -43,11 +43,11 @@ const defaultOtherPaddle: Paddle = {
 };
 
 const defaultBall: Ball = {
-  x: 600 / 2,
-  y: 300 / 2,
-  radius: 5,
-  dx: 3,
-  dy: 3,
+	x: 600 / 2,
+	y: 300 / 2,
+	radius: 5,
+	dx: 3,
+	dy: 3,
 };
 
 const INITIAL_SCORE = { player: 0, computer: 0 };
@@ -58,22 +58,22 @@ const INCREASE_SPEED = 0.2;
 @WebSocketGateway()
 @Injectable()
 export class MyGateway implements OnModuleInit, OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer()
-  server: Server;
+	@WebSocketServer()
+	server: Server;
 
-//   private players: Player[] = [];
-  private rooms: Map<string, Room> = new Map();
-  private gameInterval: any;
-  private gameActive = false;
+//	 private players: Player[] = [];
+	private rooms: Map<string, Room> = new Map();
+	private gameInterval: any;
+	private gameActive = false;
 
-  onModuleInit() {
-    // Initialize env variables if nedded not socket
-  }
+	onModuleInit() {
+		// Initialize env variables if nedded not socket
+	}
 
-  handleConnection(client: any) {
-    console.log('Client connected: ', client.id);
+	handleConnection(client: any) {
+		console.log('Client connected: ', client.id);
 
-    let room : Room | undefined;
+		let room : Room | undefined;
 
 	for (const existRoom of this.rooms.values()) {
 		if (existRoom.players.length === 1) {
@@ -86,135 +86,132 @@ export class MyGateway implements OnModuleInit, OnGatewayConnection, OnGatewayDi
 		room = new Room();
 		room.roomName = Math.random().toString(36).substring(7);
 		this.rooms.set(room.roomName, room);
+		room.players.push({ id: room.players.length + 1, socket: client, paddle: defaultPaddle, room: room.roomName });
+		client.join(room.roomName);
+		client.emit('JoinRoom', room.roomName);
+		client.emit('InitGame', defaultBall, defaultOtherPaddle, INITIAL_SCORE.player, INITIAL_SCORE.computer, ROUNDS);
 	}
-
-	room.players.push({ id: room.players.length + 1, socket: client, paddle: defaultPaddle, room: room.roomName });
-	client.join(room.roomName);
-	client.emit('JoinRoom', room.roomName);
-	client.emit('InitGame', defaultBall, defaultOtherPaddle, INITIAL_SCORE.player, INITIAL_SCORE.computer, ROUNDS);
-	if (room.players.length === 2) {
+	else
+	{
+		room.players.push({ id: room.players.length + 1, socket: client, paddle: defaultOtherPaddle, room: room.roomName });
+		client.join(room.roomName);
+		client.emit('JoinRoom', room.roomName);
+		client.emit('InitGame', defaultBall, defaultPaddle, INITIAL_SCORE.player, INITIAL_SCORE.computer, ROUNDS);
 		this.server.to(room.roomName).emit('StartGame', room.roomName);
 		this.startGame(room);
 		this.gameActive = true;
 	}
-  }
+}
 
-  handleDisconnect(client: any) {
-    const room = this.findRoomByPlayerSocket(client);
-    
-    if (room) {
-      room.players = room.players.filter((player) => player.socket !== client);
-
-      if (room.players.length < 2) {
-        this.stopGame();
-        this.gameActive = false;
-        this.rooms.delete(room.roomName); // Remove the room if it's empty
-      }
-    }
-  }
+handleDisconnect(client: any) {
+	const room = this.findRoomByPlayerSocket(client);
+	
+	if (room) {
+		room.players = room.players.filter((player) => player.socket !== client);
+		if (room.players.length < 2) {
+			this.stopGame();
+			this.gameActive = false;
+			this.rooms.delete(room.roomName); // Remove the room if it's empty
+		}
+	}
+}
 
 private findRoomByPlayerSocket(socket: any): Room | undefined {
-    for (const room of this.rooms.values()) {
-      const playerInRoom = room.players.find((player) => player.socket === socket);
-      if (playerInRoom) {
-        return room;
-      }
-    }
-    return undefined;
-  }
+	for (const room of this.rooms.values()) {
+		const playerInRoom = room.players.find((player) => player.socket === socket);
+		if (playerInRoom) {
+			return room;
+		}
+	}
+	return undefined;
+}
 
-  @SubscribeMessage('UpdatePlayerPaddle')
-  handleUpdatePaddle(client: any, paddle: Paddle) {
+	@SubscribeMessage('UpdatePlayerPaddle')
+	handleUpdatePaddle(client: any, paddle: Paddle) {
 	const room = this.findRoomByPlayerSocket(client);
 
 	if (room) {
-	  const player = room.players.find((p) => p.socket === client);
-  
-	  if (player) {
+		const player = room.players.find((p) => p.socket === client);
+	
+		if (player) {
 		player.paddle = paddle;
 		// Emit the updated paddle to the other player in the same room
 		const otherPlayer = room.players.find((p) => p !== player);
 		if (otherPlayer) {
-		  otherPlayer.socket.emit('SET_OTHER_PADDLE', player.paddle);
+			otherPlayer.socket.emit('SET_OTHER_PADDLE', player.paddle);
 		}
-	  }
+		}
 	}
-  }
+}
 
 private startGame(room: Room) {
-	console.log("startGame function called");
+	console.log("startGame");
 	if (!this.gameActive) {
 		this.gameActive = true;
 		this.gameInterval = interval(INTERVAL).subscribe(() => {
-		  if (!this.gameActive) {
+			if (!this.gameActive) {
 			this.gameInterval.unsubscribe();
 			return;
-		  }
-		  this.updateGame(room);
+			}
+			this.updateGame(room);
 		});
-	  }
+	}
 }
 
 private stopGame() {
 	console.log("stopGame");
-    this.gameActive = false;
+		this.gameActive = false;
 	if (this.gameInterval)
 		this.gameInterval.unsubscribe();
-  }
+}
 
-  private updateGame(room: Room) {
-	console.log("updateGame function called");
-     // Calculate the new ball position based on its current position and velocity
-  room.ball.x += room.ball.dx;
-  room.ball.y += room.ball.dy;
+private updateGame(room: Room) {
+	// Calculate the new ball position based on its current position and velocity
+	room.ball.x += room.ball.dx;
+	room.ball.y += room.ball.dy;
 
-  // Check for collisions with top and bottom walls
-  if (room.ball.y - room.ball.radius < 0 || room.ball.y + room.ball.radius > 300) {
-    room.ball.dy *= -1; // Reverse the vertical velocity of the ball
-  }
-
-  // Check for collisions with paddles
-  for (const player of room.players) {
-    const otherPlayer = room.players.find((p) => p !== player);
-
-    if (
-      room.ball.x + room.ball.radius >= player.paddle.x &&
-      room.ball.y >= player.paddle.y &&
-      room.ball.y < player.paddle.y + player.paddle.height
-    ) {
-      // Ball hits the player's paddle
-      room.ball.dx *= -1; // Reverse the horizontal velocity of the ball
-    } else if (
-      room.ball.x - room.ball.radius <= otherPlayer.paddle.x + otherPlayer.paddle.width &&
-      room.ball.y >= otherPlayer.paddle.y &&
-      room.ball.y < otherPlayer.paddle.y + otherPlayer.paddle.height
-    ) {
-      // Ball hits the other player's paddle
-      room.ball.dx *= -1; // Reverse the horizontal velocity of the ball
-    }
-
-    // Check for scoring conditions
-    if (room.ball.x + room.ball.radius > 600) {
-      // Player misses the ball
-    //   computerScore++;
-      this.resetBall(room.ball);
-    } else if (room.ball.x - room.ball.radius < 0) {
-      // Other player misses the ball
-    //   playerScore++;
-      this.resetBall(room.ball);
-    }
-
-    // Emit updated ball position to the current player
-    player.socket.emit('SET_BALL', room.ball);
-  	}
+	// Check for collisions with top and bottom walls
+	if (room.ball.y - room.ball.radius < 0 || room.ball.y + room.ball.radius > 300) {
+		room.ball.dy *= -1; // Reverse the vertical velocity of the ball
 	}
 
-	// private getOtherPaddle(player: Player): Paddle {
-	// 	const otherPlayer = this.players.find((p) => p !== player && p.room === player.room);
-	// 	return otherPlayer ? otherPlayer.paddle : undefined;
-	// }
+	// Check for collisions with paddles
+	for (const player of room.players) {
+		const otherPlayer = room.players.find((p) => p !== player);
+		if (
+			room.ball.x + room.ball.radius >= player.paddle.x &&
+			room.ball.y >= player.paddle.y &&
+			room.ball.y < player.paddle.y + player.paddle.height
+		) {
+			// Ball hits the player's paddle
+			room.ball.dx *= -1; // Reverse the horizontal velocity of the ball
+		} else if (
+			room.ball.x - room.ball.radius <= otherPlayer.paddle.x + otherPlayer.paddle.width &&
+			room.ball.y >= otherPlayer.paddle.y &&
+			room.ball.y < otherPlayer.paddle.y + otherPlayer.paddle.height
+		) {
+			// Ball hits the other player's paddle
+			room.ball.dx *= -1; // Reverse the horizontal velocity of the ball
+		}
 
-	private resetBall(ball: Ball) {
+		// Check for scoring conditions
+		if (room.ball.x + room.ball.radius > 600) {
+			// Player misses the ball
+		//	 computerScore++;
+			this.resetBall(room.ball);
+		} else if (room.ball.x - room.ball.radius < 0) {
+			// Other player misses the ball
+		//	 playerScore++;
+			this.resetBall(room.ball);
+		}
+		// Emit updated ball position to the current player and the other player paddle
+		player.socket.emit('UPDATE', room.ball, otherPlayer.paddle);
+		otherPlayer.socket.emit('UPDATE', room.ball, player.paddle);
+		break;
+		}
+}
+
+private resetBall(ball: Ball) {
 		ball.x = 600 / 2;
 		ball.y = 300 / 2;
 		ball.dx = 3;

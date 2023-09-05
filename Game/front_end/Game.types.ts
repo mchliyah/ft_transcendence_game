@@ -1,5 +1,5 @@
 import React from 'react';
-import {Paddle, Ball, GameData, ballAction, playerPaddleAction, otherPaddleAction, gameDataAction} from '../Types';
+import {Paddle, Ball, GameData } from '../Types';
 import { MySocket } from './src/game/Game';
 
 type ctxrend = CanvasRenderingContext2D;
@@ -32,15 +32,6 @@ const initalotherpaddle: Paddle = {
 	dy: 3,
 };
 
-// const InialtGame: GameData = {
-// 	playerPaddle: initialPlayerPaddle,
-// 	otherpaddle: initalotherpaddle,
-// 	ball: initialBall,
-// 	playerScore: 0,
-// 	computerScore: 0,
-// 	rounds: 3,
-// };
-
 const InitBall: Action = {
 	type: 'SET_BALL',
 	payload: initialBall,
@@ -55,13 +46,6 @@ const initotherpaddle: Action = {
 	type: 'SET_OTHER_PADDLE',
 	payload: initalotherpaddle,
 };
-
-
-// const InitGame: Action = {
-// 	type: 'SET_GAME_DATA',
-// 	payload: InialtGame,
-// };
-
 
 interface State {
 	ws: MySocket | null;
@@ -80,10 +64,10 @@ type Action =
 const initialState: State = {
 	ws: null,
 	playerPaddle: initialPlayerPaddle,
-	otherPaddle: initotherpaddle,
+	otherPaddle: initalotherpaddle,
 	ball: initialBall,
 	// gameData: InitGame
 };
 
-export {initialState, InitBall, InitPlayerPaddle, initotherpaddle, InitGame};
+export {initialState, InitBall, InitPlayerPaddle, initotherpaddle};
 export type { ctxrend, cnvelem, ballstat, paddlestat, gamestat , State, Action};

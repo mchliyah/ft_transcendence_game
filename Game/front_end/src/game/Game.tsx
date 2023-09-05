@@ -1,10 +1,10 @@
 
 import React, { useEffect, useReducer, useRef } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 import { drawPaddle, drawBall, drawRounds, drawScore } from './DrawElements';
 import { SetEventLisners, ListenOnSocket } from './Game.lisners';
-import { Ball, Paddle, GameData } from '../../../Types';
-import { ctxrend, cnvelem, initialState, State, Action, InitBall, InitPlayerPaddle, initotherpaddle, InitGame} from '../../Game.types';
+import { Ball, Paddle } from '../../../Types';
+import { ctxrend, cnvelem, initialState, State, Action } from '../../Game.types';
 
 export type MySocket = ReturnType<typeof io>;
 
@@ -28,34 +28,17 @@ export const gameReducer = (state: State, action: Action): State => {
       return { ...state, otherPaddle: action.payload };
     case 'SET_BALL':
 		return { ...state, ball: action.payload };
-    // case 'SET_GAME_DATA':
-    //   return { ...state, gameData: action.payload };
     default:
       return state;
   }
 };
 
-function draw(ws: MySocket, ctx: ctxrend, canvas: cnvelem, ball: Ball, playerPaddle: Paddle, otherpaddle: Paddle) {
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	if (playerPaddle){
-		// ctx.clearRect(playerPaddle.x, 0, playerPaddle.width, canvas.height);
-		drawPaddle(playerPaddle, 'green', ctx, canvas);
-	}
-	if (otherpaddle)
-	{
-		// ctx.clearRect(otherpaddle.x, 0, otherpaddle.width, canvas.height);
-		drawPaddle(otherpaddle, 'red', ctx, canvas);
-	}
-	if (ball)
-		drawBall(ctx, ball);
-	if (rounds)
-	{
-		// ctx.clearRect(canvas.width / 2 - 10, 0, 20, canvas.height);
-		drawRounds(rounds, ctx, canvas);
-	}
-	if (score.playerScore || score.computerScore)
-		drawScore(score.playerScore, score.computerScore , ctx, canvas);
-	requestAnimationFrame(() => { draw(ws, ctx, canvas, ball, playerPaddle, otherpaddle); });
+function draw(ctx: ctxrend, canvas: cnvelem, ball: Ball, playerPaddle: Paddle, otherpaddle: Paddle) {
+	drawPaddle(otherpaddle, 'red', ctx, canvas);
+	drawBall(ctx, ball);
+	drawRounds(rounds, ctx, canvas);
+	drawScore(score.playerScore, score.computerScore , ctx, canvas);
+	drawPaddle(playerPaddle, 'green', ctx, canvas);
 }
 
 function useEffectOnce(effect: React.EffectCallback) {
@@ -90,16 +73,16 @@ const Game: React.FC = () => {
 			SetEventLisners( (newPaddle) => dispatch({ type: 'SET_PLAYER_PADDLE',  payload: newPaddle}), canvas, paddleSpeed );
     }
   };
-	
+
 	const updateCanvas = () => {
 		if (canvasRef.current && state.ws) {
 			const canvas = canvasRef.current;
 			const ctx: ctxrend = canvas.getContext('2d') as ctxrend;
 			
 			// console.log('clearing canvas');
-			ListenOnSocket( state, state.ws, dispatch, score, rounds );
-			// ctx.clearRect(0, 0, canvas.width, canvas.height);
-			draw(state.ws, ctx, canvas, state.ball, state.playerPaddle, state.otherPaddle);
+			ListenOnSocket(state.ws, dispatch, score, rounds );
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			draw(ctx, canvas, state.ball, state.playerPaddle, state.otherPaddle);
 		}
 	};
 
