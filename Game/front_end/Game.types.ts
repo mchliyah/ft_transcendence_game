@@ -1,12 +1,46 @@
 import React from 'react';
-import {Paddle, Ball, GameData } from '../Types';
-import { MySocket } from './src/game/Game';
+import { MySocket} from './src/game/Game';
 
 type ctxrend = CanvasRenderingContext2D;
 type cnvelem = HTMLCanvasElement;
 type ballstat = React.Dispatch<React.SetStateAction<Ball>>;
 type paddlestat = React.Dispatch<React.SetStateAction<Paddle>>;
-type gamestat = React.Dispatch<React.SetStateAction<GameData>>;
+
+export interface Paddle {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+	dy: number;
+}
+
+export interface Ball {
+	x: number;
+	y: number;
+	radius: number;
+	dx: number;
+	dy: number;
+}
+
+export interface ballAction {
+	type: 'SET_BALL';
+	payload: Ball;
+}
+
+export interface playerPaddleAction {
+	type: 'SET_PLAYER_PADDLE';
+	payload: Paddle;
+}
+
+export interface otherPaddleAction {
+	type: 'SET_OTHER_PADDLE';
+	payload: Paddle;
+}
+
+export interface gameDataAction {
+	type: 'SET_GAME_DATA';
+	payload: GameData;
+}
 
 const initialBall: Ball = {
 	x: 300,
@@ -32,26 +66,29 @@ const initalotherpaddle: Paddle = {
 	dy: 3,
 };
 
-const InitBall: Action = {
-	type: 'SET_BALL',
-	payload: initialBall,
-};
-
-const InitPlayerPaddle: Action = {
-	type: 'SET_PLAYER_PADDLE',
-	payload: initialPlayerPaddle,
-};
-
-const initotherpaddle: Action = {
-	type: 'SET_OTHER_PADDLE',
-	payload: initalotherpaddle,
-};
-
 interface State {
 	ws: MySocket | null;
-	playerPaddle: Paddle;
-	otherPaddle: Paddle;
+	gamedata: GameData | {
+		playerpad: Paddle;
+		otherpad: Paddle;
+		ball: Ball;
+		playerScore: number;
+		otherScore: number;
+		rounds: number;
+		id: number;
+		padlleSpeed: number;
+	};
+}
+
+interface GameData {
+	playerpad: Paddle;
+	otherpad: Paddle;
 	ball: Ball;
+	playerScore: number;
+	otherScore: number;
+	rounds: number;
+	id: number;
+	padlleSpeed: number;
 }
 
 type Action =
@@ -63,11 +100,17 @@ type Action =
   
 const initialState: State = {
 	ws: null,
-	playerPaddle: initialPlayerPaddle,
-	otherPaddle: initalotherpaddle,
-	ball: initialBall,
-	// gameData: InitGame
+	gamedata: {
+		playerpad: initialPlayerPaddle,
+		otherpad: initalotherpaddle,
+		ball: initialBall,
+		playerScore: 0,
+		otherScore: 0,
+		rounds: 0,
+		id: 0,
+		padlleSpeed: 3,
+	},
 };
 
-export {initialState, InitBall, InitPlayerPaddle, initotherpaddle};
-export type { ctxrend, cnvelem, ballstat, paddlestat, gamestat , State, Action};
+export {initialState};
+export type { ctxrend, cnvelem, ballstat, paddlestat , State, Action, GameData};

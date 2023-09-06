@@ -1,20 +1,13 @@
-import { GameData, Paddle, Ball } from "../../../Types";
-import { ballstat, cnvelem, gamestat, initotherpaddle, paddlestat } from "../../Game.types";
+import { cnvelem} from "../../Game.types";
 import { MySocket } from "./Game";
 import { Action } from "../../Game.types";
-import { Dispatch , SetStateAction} from "react";
-import { initialPlayerPaddle , State} from "../../Game.types";
-import { Score } from "./Game";
+import { GameData, Ball, Paddle} from "../../Game.types";
 
-function SetEventLisners(
-	dispatch: React.Dispatch<Action>,
-	canvas: cnvelem,
-	paddleSpeed: number
-  ) {
+function SetEventLisners( dispatch: React.Dispatch<Action>, gamedata: GameData, canvas: cnvelem) {
 	window.addEventListener('keydown', (event) => {
 	  if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
-		let padlle = initialPlayerPaddle;
-		padlle.dy = event.code === 'ArrowUp' ? -paddleSpeed : paddleSpeed
+		let padlle = gamedata.playerpad;
+		padlle.dy = event.code === 'ArrowUp' ? -gamedata.padlleSpeed : gamedata.padlleSpeed;
 		dispatch({
 		  type: 'SET_PLAYER_PADDLE',
 		  payload: {...padlle}
@@ -24,7 +17,7 @@ function SetEventLisners(
   
 	window.addEventListener('keyup', (event) => {
 	  if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
-		let paddle = initialPlayerPaddle;
+		let paddle = gamedata.playerpad;
 		paddle.dy = 0;
 		dispatch({
 		  type: 'SET_PLAYER_PADDLE',
@@ -36,27 +29,19 @@ function SetEventLisners(
 	canvas.addEventListener('mousemove', (event: any) => {
 		const canvasRect = canvas.getBoundingClientRect();
 		const mouseY = event.clientY - canvasRect.top;
-		let paddle = initialPlayerPaddle;
-		paddle.y = mouseY - paddle.height / 2;
-		paddle.y = Math.max(paddle.y, 0); // Ensure it's not less than 0
-		paddle.y = Math.min(paddle.y, 300 - paddle.height);
+		let newgameData = {...gamedata};
+		newgameData.playerpad.y = mouseY - newgameData.playerpad.height / 2;
+		// paddle.y = mouseY - paddle.height / 2;
+		// paddle.y = Math.max(paddle.y, 0); // Ensure it's not less than 0
+		// paddle.y = Math.min(paddle.y, 300 - paddle.height);
 		dispatch({
-		type: 'SET_PLAYER_PADDLE',
-		payload: {...paddle}
+		type: 'SET_GAME_DATA',
+		payload: newgameData
 	  });
 	});
   }
 
-function ListenOnSocket(ws: MySocket, dispatch: React.Dispatch<Action>, score: Score, rounds: number ) {
-	ws.on('InitGame', (ball : Ball, paddle : Paddle, playerScore: number, computerScore: number, rounds: number) => {
-	//   console.log('InitGame', gameData);
-	  dispatch({ type: 'SET_BALL', payload: ball });
-	  dispatch({ type: 'SET_PLAYER_PADDLE', payload: paddle });
-	//   dispatch({ type: 'SET_GAME_DATA', payload: gameData });
-	  score.playerScore = playerScore;
-	  score.computerScore = computerScore;
-	  rounds = rounds;
-	});
+function ListenOnSocket(ws: MySocket, dispatch: React.Dispatch<Action>, gamedata: GameData) {
   
 	ws.on('connect', () => {
 	  console.log('connected');
@@ -83,15 +68,14 @@ function ListenOnSocket(ws: MySocket, dispatch: React.Dispatch<Action>, score: S
 	});
 
 	ws.on('SET_OTHER_PADDLE', (paddle: Paddle) => {
-		console.log('SET_OTHER_PADDLE', paddle); // print the other paddle position
-		dispatch({ type: 'SET_OTHER_PADDLE', payload: paddle }); // set the other paddle position based on the server
+		let newgameData = {...gamedata, otherpad: {...paddle}};
+		dispatch({ type: 'SET_GAME_DATA', payload: newgameData }); // set the other paddle position based on the server
 	})
 
 	ws.on('UPDATE', (ball: Ball, other: Paddle) => {
-		console.log('UPDATE ball ', ball);
-		console.log('UPDATE paddle ', other);
-		dispatch({ type: 'SET_BALL', payload: ball });
-		dispatch({ type: 'SET_OTHER_PADDLE', payload: other });
+		// console.log('paddle', other);
+		let newgameData = {...gamedata, ball : {...ball}, otherpad: other};
+		dispatch({ type: 'SET_GAME_DATA', payload: newgameData });
 	})
 }
 

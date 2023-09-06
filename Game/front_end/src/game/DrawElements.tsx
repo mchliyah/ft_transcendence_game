@@ -1,4 +1,4 @@
-import { Paddle, Ball } from "../../../Types";
+import { Ball, Paddle } from "../../Game.types";
 import { ctxrend, cnvelem } from "../../Game.types";
 
 function drawPaddle(paddle: Paddle, color: string, ctx: ctxrend, canvas: cnvelem) {

@@ -20,6 +20,7 @@ interface Player {
 	room: string;
 }
 
+
 class Room {
 	players: Player[] = [];
 	ball: Ball = defaultBall;
@@ -27,7 +28,7 @@ class Room {
 	}
 
 const defaultPaddle: Paddle = {
-	x: 10,
+	x: 600 - 20,
 	y: 300 / 2 - 50 / 2,
 	width: 5,
 	height: 60,
@@ -35,7 +36,7 @@ const defaultPaddle: Paddle = {
 };
 
 const defaultOtherPaddle: Paddle = {
-	x: 600 - 20,
+	x: 10,
 	y: 300 / 2 - 50 / 2,
 	width: 5,
 	height: 60,
@@ -52,7 +53,7 @@ const defaultBall: Ball = {
 
 const INITIAL_SCORE = { player: 0, computer: 0 };
 const ROUNDS = 3;
-const INTERVAL = 10;
+const INTERVAL = 60;
 const INCREASE_SPEED = 0.2;
 
 @WebSocketGateway()
@@ -89,14 +90,34 @@ export class MyGateway implements OnModuleInit, OnGatewayConnection, OnGatewayDi
 		room.players.push({ id: room.players.length + 1, socket: client, paddle: defaultPaddle, room: room.roomName });
 		client.join(room.roomName);
 		client.emit('JoinRoom', room.roomName);
-		client.emit('InitGame', defaultBall, defaultOtherPaddle, INITIAL_SCORE.player, INITIAL_SCORE.computer, ROUNDS);
+		let gamedata: GameData = {
+			playerpad: defaultPaddle,
+			otherpad: defaultOtherPaddle,
+			ball: defaultBall,
+			playerScore: INITIAL_SCORE.player,
+			otherScore: INITIAL_SCORE.computer,
+			rounds: ROUNDS,
+			id: room.players.length,
+			padlleSpeed: 3,
+		};
+		client.emit('InitGame', gamedata);
 	}
 	else
 	{
 		room.players.push({ id: room.players.length + 1, socket: client, paddle: defaultOtherPaddle, room: room.roomName });
 		client.join(room.roomName);
 		client.emit('JoinRoom', room.roomName);
-		client.emit('InitGame', defaultBall, defaultPaddle, INITIAL_SCORE.player, INITIAL_SCORE.computer, ROUNDS);
+		const gamedata: GameData = {
+			playerpad: defaultOtherPaddle,
+			otherpad: defaultPaddle,
+			ball: defaultBall,
+			playerScore: INITIAL_SCORE.player,
+			otherScore: INITIAL_SCORE.computer,
+			rounds: ROUNDS,
+			id: room.players.length,
+			padlleSpeed: 3,
+		};
+		client.emit('InitGame', gamedata);
 		this.server.to(room.roomName).emit('StartGame', room.roomName);
 		this.startGame(room);
 		this.gameActive = true;
@@ -134,11 +155,12 @@ private findRoomByPlayerSocket(socket: any): Room | undefined {
 		const player = room.players.find((p) => p.socket === client);
 	
 		if (player) {
-		player.paddle = paddle;
-		// Emit the updated paddle to the other player in the same room
-		const otherPlayer = room.players.find((p) => p !== player);
-		if (otherPlayer) {
-			otherPlayer.socket.emit('SET_OTHER_PADDLE', player.paddle);
+			player.paddle = paddle;
+			// Emit the updated paddle to the other player in the same room
+			const otherPlayer = room.players.find((p) => p !== player);
+			if (otherPlayer) {
+				console.log('PLAYE ', player.id, 'PADDLE ', player.paddle,  ' OTHER ', otherPlayer.id, 'PADDLE ', otherPlayer.paddle);
+				otherPlayer.socket.emit('SET_OTHER_PADDLE', player.paddle);
 		}
 		}
 	}
