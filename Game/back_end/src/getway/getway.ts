@@ -10,8 +10,7 @@ import { Socket } from 'dgram';
 import { Ball, Paddle, GameData } from '../../../Types';
 import { Server } from 'socket.io';
 import { interval, take } from 'rxjs';
-import { Console } from 'console';
-import { emit } from 'process';
+// import {exit} from 'process';
 
 interface Player {
 	id: number;
@@ -97,7 +96,7 @@ export class MyGateway implements OnModuleInit, OnGatewayConnection, OnGatewayDi
 			playerScore: INITIAL_SCORE.player,
 			otherScore: INITIAL_SCORE.computer,
 			rounds: ROUNDS,
-			id: room.players.length,
+			id: room.players.length + 1,
 			padlleSpeed: 3,
 		};
 		client.emit('InitGame', gamedata);
@@ -114,7 +113,7 @@ export class MyGateway implements OnModuleInit, OnGatewayConnection, OnGatewayDi
 			playerScore: INITIAL_SCORE.player,
 			otherScore: INITIAL_SCORE.computer,
 			rounds: ROUNDS,
-			id: room.players.length,
+			id: room.players.length + 1,
 			padlleSpeed: 3,
 		};
 		client.emit('InitGame', gamedata);
@@ -157,11 +156,11 @@ private findRoomByPlayerSocket(socket: any): Room | undefined {
 		if (player) {
 			player.paddle = paddle;
 			// Emit the updated paddle to the other player in the same room
-			const otherPlayer = room.players.find((p) => p !== player);
-			if (otherPlayer) {
-				console.log('PLAYE ', player.id, 'PADDLE ', player.paddle,  ' OTHER ', otherPlayer.id, 'PADDLE ', otherPlayer.paddle);
-				otherPlayer.socket.emit('SET_OTHER_PADDLE', player.paddle);
-		}
+		// 	const otherPlayer = room.players.find((p) => p !== player);
+		// 	if (otherPlayer) {
+		// 		console.log('PLAYE ', player.id, 'PADDLE ', player.paddle,  ' OTHER ', otherPlayer.id, 'PADDLE ', otherPlayer.paddle);
+		// 		otherPlayer.socket.emit('SET_OTHER_PADDLE', player.paddle);
+		// }
 		}
 	}
 }
@@ -191,7 +190,7 @@ private updateGame(room: Room) {
 	// Calculate the new ball position based on its current position and velocity
 	room.ball.x += room.ball.dx;
 	room.ball.y += room.ball.dy;
-
+	let newgameData 
 	// Check for collisions with top and bottom walls
 	if (room.ball.y - room.ball.radius < 0 || room.ball.y + room.ball.radius > 300) {
 		room.ball.dy *= -1; // Reverse the vertical velocity of the ball

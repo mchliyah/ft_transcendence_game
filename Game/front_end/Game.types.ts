@@ -22,49 +22,30 @@ export interface Ball {
 	dy: number;
 }
 
-export interface ballAction {
-	type: 'SET_BALL';
-	payload: Ball;
-}
 
-export interface playerPaddleAction {
-	type: 'SET_PLAYER_PADDLE';
-	payload: Paddle;
-}
+// const initialBall: Ball = {
+// 	x: 300,
+// 	y: 150,
+// 	radius: 5,
+// 	dx: 3,
+// 	dy: 3,
+// };
 
-export interface otherPaddleAction {
-	type: 'SET_OTHER_PADDLE';
-	payload: Paddle;
-}
+// export const initialPlayerPaddle: Paddle = {
+// 	x: 600 - 20,
+// 	y: 300 / 2 - 50 / 2,
+// 	width: 5,
+// 	height: 60,
+// 	dy: 3,
+// };
 
-export interface gameDataAction {
-	type: 'SET_GAME_DATA';
-	payload: GameData;
-}
-
-const initialBall: Ball = {
-	x: 300,
-	y: 150,
-	radius: 5,
-	dx: 3,
-	dy: 3,
-};
-
-export const initialPlayerPaddle: Paddle = {
-	x: 600 - 20,
-	y: 300 / 2 - 50 / 2,
-	width: 5,
-	height: 60,
-	dy: 3,
-};
-
-const initalotherpaddle: Paddle = {
-	x: 10,
-	y: 300 / 2 - 50 / 2,
-	width: 5,
-	height: 60,
-	dy: 3,
-};
+// const initalotherpaddle: Paddle = {
+// 	x: 10,
+// 	y: 300 / 2 - 50 / 2,
+// 	width: 5,
+// 	height: 60,
+// 	dy: 3,
+// };
 
 interface State {
 	ws: MySocket | null;
@@ -81,14 +62,14 @@ interface State {
 }
 
 interface GameData {
-	playerpad: Paddle;
-	otherpad: Paddle;
-	ball: Ball;
-	playerScore: number;
-	otherScore: number;
-	rounds: number;
-	id: number;
-	padlleSpeed: number;
+	playerpad: Paddle | null;
+	otherpad: Paddle | null;
+	ball: Ball | null;
+	playerScore: number | null;
+	otherScore: number | null;
+	rounds: number | null;
+	id: number | null;
+	padlleSpeed: number | null;
 }
 
 type Action =
@@ -101,14 +82,14 @@ type Action =
 const initialState: State = {
 	ws: null,
 	gamedata: {
-		playerpad: initialPlayerPaddle,
-		otherpad: initalotherpaddle,
-		ball: initialBall,
-		playerScore: 0,
-		otherScore: 0,
-		rounds: 0,
-		id: 0,
-		padlleSpeed: 3,
+		playerpad: null,
+		otherpad: null,
+		ball: null,
+		playerScore: null,
+		otherScore: null,
+		rounds: null,
+		id: null,
+		padlleSpeed: null,
 	},
 };
 

@@ -4,41 +4,47 @@ import { Action } from "../../Game.types";
 import { GameData, Ball, Paddle} from "../../Game.types";
 
 function SetEventLisners( dispatch: React.Dispatch<Action>, gamedata: GameData, canvas: cnvelem) {
-	window.addEventListener('keydown', (event) => {
-	  if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
-		let padlle = gamedata.playerpad;
-		padlle.dy = event.code === 'ArrowUp' ? -gamedata.padlleSpeed : gamedata.padlleSpeed;
-		dispatch({
-		  type: 'SET_PLAYER_PADDLE',
-		  payload: {...padlle}
-		});
-	  }
-	});
+	// window.addEventListener('keydown', (event) => {
+	//   if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
+	// 	let padlle = gamedata.playerpad;
+	// 	padlle.dy = event.code === 'ArrowUp' ? -gamedata.padlleSpeed : gamedata.padlleSpeed;
+	// 	dispatch({
+	// 	  type: 'SET_PLAYER_PADDLE',
+	// 	  payload: {...padlle}
+	// 	});
+	//   }
+	// });
   
-	window.addEventListener('keyup', (event) => {
-	  if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
-		let paddle = gamedata.playerpad;
-		paddle.dy = 0;
-		dispatch({
-		  type: 'SET_PLAYER_PADDLE',
-		  payload: {...paddle}
-		});
-	  }
-	});
+	// window.addEventListener('keyup', (event) => {
+	//   if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
+	// 	let paddle = gamedata.playerpad;
+	// 	paddle.dy = 0;
+	// 	dispatch({
+	// 	  type: 'SET_PLAYER_PADDLE',
+	// 	  payload: {...paddle}
+	// 	});
+	//   }
+	// });
   
 	canvas.addEventListener('mousemove', (event: any) => {
 		const canvasRect = canvas.getBoundingClientRect();
 		const mouseY = event.clientY - canvasRect.top;
-		let newgameData = {...gamedata};
-		newgameData.playerpad.y = mouseY - newgameData.playerpad.height / 2;
+		let y :number;
+		if (gamedata.playerpad){
+			y = mouseY - gamedata.playerpad.height / 2;
+			y = Math.max(y, 0); // Ensure it's not less than 0
+			y = Math.min(y, 300 - gamedata.playerpad.height);
+			gamedata.playerpad.y = y;
+			
+		}
 		// paddle.y = mouseY - paddle.height / 2;
 		// paddle.y = Math.max(paddle.y, 0); // Ensure it's not less than 0
 		// paddle.y = Math.min(paddle.y, 300 - paddle.height);
 		dispatch({
-		type: 'SET_GAME_DATA',
-		payload: newgameData
+		type: 'SET_PLAYER_PADDLE',
+		payload: {...gamedata.playerpad}
 	  });
-	});
+	});// need to send actions instead of values to the erver, (protection of data)
   }
 
 function ListenOnSocket(ws: MySocket, dispatch: React.Dispatch<Action>, gamedata: GameData) {
@@ -67,13 +73,13 @@ function ListenOnSocket(ws: MySocket, dispatch: React.Dispatch<Action>, gamedata
 		console.log('StartGame on room', message); // print the start game message	
 	});
 
-	ws.on('SET_OTHER_PADDLE', (paddle: Paddle) => {
-		let newgameData = {...gamedata, otherpad: {...paddle}};
-		dispatch({ type: 'SET_GAME_DATA', payload: newgameData }); // set the other paddle position based on the server
-	})
+	// ws.on('SET_OTHER_PADDLE', (paddle: Paddle) => {
+	// 	let newgameData = {...gamedata, otherpad: {...paddle}};
+	// 	dispatch({ type: 'SET_GAME_DATA', payload: newgameData }); // set the other paddle position based on the server
+	// })
 
 	ws.on('UPDATE', (ball: Ball, other: Paddle) => {
-		// console.log('paddle', other);
+		console.log('paddle from server ', other);
 		let newgameData = {...gamedata, ball : {...ball}, otherpad: other};
 		dispatch({ type: 'SET_GAME_DATA', payload: newgameData });
 	})

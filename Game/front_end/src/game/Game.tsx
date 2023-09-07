@@ -8,14 +8,14 @@ import { ctxrend, cnvelem, initialState, State, Action, GameData } from '../../G
 export type MySocket = ReturnType<typeof io>;
 
 let gamedata : GameData = {
-	playerpad: {x: 0, y: 0, width: 10, height: 50, dy: 0},
-	otherpad: {x: 0, y: 0, width: 10, height: 50, dy: 0},
-	ball: {x: 0, y: 0, radius: 5, dx: 0, dy: 0},
-	playerScore: 0,
-	otherScore: 0,
-	rounds: 0,
-	id: 0,
-	padlleSpeed: 5,
+	playerpad: null,
+	otherpad: null,
+	ball: null,
+	playerScore: null,
+	otherScore: null,
+	rounds: null,
+	id: null,
+	padlleSpeed: null,
 }
 
 export const gameReducer = (state: State, action: Action): State => {
@@ -27,7 +27,7 @@ export const gameReducer = (state: State, action: Action): State => {
 			{
 				// console.log('SET_PLAYER_PADDLE', action.payload);
 				newgameData.playerpad = {...action.payload};
-				return { ...state, gamedata: newgameData };
+				return { ...state, gamedata: newgameData};
 			}
 		case 'SET_OTHER_PADDLE':
 			{
@@ -52,11 +52,17 @@ export const gameReducer = (state: State, action: Action): State => {
 
 function draw(ctx: ctxrend, canvas: cnvelem, gamedata: GameData) {
 	// console.log('draw pdalles ', gamedata.playerpad);
-	drawPaddle(gamedata.otherpad, 'red', ctx, canvas);
-	drawPaddle(gamedata.playerpad, 'green', ctx, canvas);
-	drawBall(ctx, gamedata.ball);
-	drawRounds(gamedata.rounds, ctx, canvas);
-	drawScore(gamedata.playerScore, gamedata.otherScore , ctx, canvas);
+	if (gamedata.otherpad && gamedata.playerpad)
+	{
+		drawPaddle(gamedata.otherpad, 'red', ctx, canvas);
+		drawPaddle(gamedata.playerpad, 'green', ctx, canvas);
+	}
+	if (gamedata.ball)
+		drawBall(ctx, gamedata.ball);
+	if (gamedata.rounds)
+		drawRounds(gamedata.rounds, ctx, canvas);
+	if (gamedata.playerScore && gamedata.otherScore)
+		drawScore(gamedata.playerScore, gamedata.otherScore , ctx, canvas);
 }
 
 function useEffectOnce(effect: React.EffectCallback) {
@@ -73,7 +79,7 @@ const Game: React.FC = () => {
 	const canvasRef = useRef<cnvelem | null>(null);
 	
 	const [state, dispatch] = useReducer(gameReducer, initialState);
-	const init = useState(false);
+	const [init, setInit] = useState(false);
 	let listning = false;
 
 	const setupSocket = () => {
@@ -101,18 +107,15 @@ const Game: React.FC = () => {
 
 	useEffect(() => {
 		console.log('useEffect callsed ');
-		init[1](true);
-	if (state.ws)
+	if (state.ws && !init)
 		state.ws.on('InitGame', (game: GameData) => {
-			//   console.log('InitGame', gameData);
+			setInit(true);
+			console.log('InitGame', game);
+			// let newgameData = {...gamedata, ...game};
 			gamedata = {...game};
-
-		//   dispatch({ type: 'SET_BALL', payload: ball });
-		//   dispatch({ type: 'SET_PLAYER_PADDLE', payload: paddle });
-		//   dispatch({ type: 'SET_OTHER_PADDLE', payload: otherpad });
 		  dispatch({ type: 'SET_GAME_DATA', payload: game });
 		});
-	}, [init]);
+	}, [init, state.ws]);
 
 	const updateCanvas = () => {
 		if (canvasRef.current && state.ws) {
@@ -131,8 +134,10 @@ const Game: React.FC = () => {
 
 	const update = () => {
 		if (state.ws && state.gamedata.playerpad) {
-			// console.log('UpdatePaddle');
+			console.log('UpdatePaddle in front end', state.gamedata.playerpad);
+
 			state.ws.emit('UpdatePlayerPaddle', state.gamedata.playerpad);
+			
 		}
 	};
 
