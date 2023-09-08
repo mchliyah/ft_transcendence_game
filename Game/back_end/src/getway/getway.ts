@@ -52,7 +52,7 @@ const defaultBall: Ball = {
 
 const INITIAL_SCORE = { player: 0, computer: 0 };
 const ROUNDS = 3;
-const INTERVAL = 60;
+const INTERVAL = 16;
 const INCREASE_SPEED = 0.2;
 
 @WebSocketGateway()

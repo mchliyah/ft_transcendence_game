@@ -49,16 +49,14 @@ export interface Ball {
 
 interface State {
 	ws: MySocket | null;
-	gamedata: GameData | {
-		playerpad: Paddle;
-		otherpad: Paddle;
-		ball: Ball;
-		playerScore: number;
-		otherScore: number;
-		rounds: number;
-		id: number;
-		padlleSpeed: number;
-	};
+	playerpad: Paddle | null;
+	otherpad: Paddle | null;
+	ball: Ball | null;
+	playerScore: number | null;
+	otherScore: number | null;
+	rounds: number | null;
+	id: number | null;
+	padlleSpeed: number | null;
 }
 
 interface GameData {
@@ -73,24 +71,26 @@ interface GameData {
 }
 
 type Action =
-	| { type: 'SET_WS'; payload: MySocket }
-	| { type: 'SET_PLAYER_PADDLE'; payload: Paddle }
-	| { type: 'SET_OTHER_PADDLE'; payload: Paddle }
-	| { type: 'SET_BALL'; payload: Ball }
-	| { type: 'SET_GAME_DATA'; payload: GameData };
+  | { type: 'SET_WS'; payload: MySocket }
+  | { type: 'SET_PLAYER_PADDLE'; payload: Paddle }
+  | { type: 'SET_OTHER_PADDLE'; payload: Paddle }
+  | { type: 'SET_BALL'; payload: Ball }
+  | { type: 'SET_PLAYER_SCORE'; payload: number }
+  | { type: 'SET_OTHER_SCORE'; payload: number }
+  | { type: 'SET_ROUNDS'; payload: number }
+  | { type: 'SET_ID'; payload: number }
+  | { type: 'SET_PADDLE_SPEED'; payload: number };
   
 const initialState: State = {
 	ws: null,
-	gamedata: {
-		playerpad: null,
-		otherpad: null,
-		ball: null,
-		playerScore: null,
-		otherScore: null,
-		rounds: null,
-		id: null,
-		padlleSpeed: null,
-	},
+	playerpad: null,
+	otherpad: null,
+	ball: null,
+	playerScore: null,
+	otherScore: null,
+	rounds: null,
+	id: null,
+	padlleSpeed: null,
 };
 
 export {initialState};
