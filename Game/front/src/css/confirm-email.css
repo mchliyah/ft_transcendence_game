@@ -1,0 +1,141 @@
+
+:root {
+    --fakhti : #a435f0;
+    --white: #fff;
+    --black: #000;
+    --corona: 'Krona One';
+    /* font-family: var(--corona); */
+    font-family: sans-serif;
+}
+
+body {
+    margin: 0;
+}
+
+.signupContainer {
+    display: flex;
+    flex-direction: row;
+}
+
+.left {
+    background-color: var(--fakhti);
+    width: 50%;
+    height: 100vh;
+    color: var(--white);
+}
+
+.right {
+    background-color: var(--white);
+    width: 50%;
+    height: 100vh;
+    padding-top: 15%;
+    
+}
+
+
+
+.TwinP {
+    width: 79px;
+    height: 25px;
+    margin: 16px 39px 75px 0;
+    font-size: 20px;
+    text-align: left;
+    font-family: var(--corona);
+    /* color: #000; */
+  }
+  
+  
+  .twinpong-1, .racquet{
+      width: 75px;
+      height: 57px;
+      flex-grow: 0;
+      margin: -45px 290px 59px 60px;
+    }
+  
+    img.Rectangle-1, .racquet{
+      width: 75px;
+      height: 57px;
+      position: absolute;
+      top: 44px;
+      left: 4px;
+    }
+  
+    .ng {
+      width: 34px;
+      height: 25px;
+      font-size: 20px;
+      font-family: var(--corona);
+      /* color: var(--black); */
+    }
+
+    .logo {
+        margin: 12px;
+    }
+.paragraph {
+    font-family: var(--corona);
+}
+#reg {
+    margin-top: 42rem;
+    margin-left: 7rem;
+}
+
+.illustration {
+    position: absolute;
+    top: 50%;
+    left: 20%;
+    transform: translate(-50%, -50%);
+    display: block;
+  }
+
+
+
+
+.right .animation {
+    position: absolute;
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    background-color: var(--fakhti);
+    top: 10%;
+    right: 23%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.right .confirm-box {
+    position: absolute;
+    /* width: 150px;
+    height: 150px; */
+    /* background-color: var(--fakhti); */
+    top: 40%;
+    right: 13%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.right .resend {
+    margin-top: 1rem;
+    /* font-family: var(--corona); */
+    font-size: 1.2rem;
+    background-color: var(--fakhti);
+    color: var(--white);
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+    height: 50px;
+    width: 250px;
+    text-decoration: none;
+    text-align: center;
+    padding: 10px;
+}
+
+.papa {
+    font-family: var(--corona);
+    color: #ccc;
+    margin-top: 20px;
+    /* margin-left: 20%;
+    font-size: 10px; */
+}

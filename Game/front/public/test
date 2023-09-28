@@ -1,0 +1,32 @@
+# db
+DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/mydb?schema=public"
+
+
+# jwt
+ACCESS_TOKEN_JWT_SECRET="6fb6cc6608e0a805813baccebadaa7554e957743f6ed3748c7f980f28fb53c51"
+EMAIL_VERIFICATION_JWT_SECRET="e5a0eaaa49ebf54a3101bdc865d24376a3b6f91f0eb9ae5e05ec99d0d8800c76"
+
+#intra 42 api
+UID_42="u-s4t2ud-8c46a4205a6fa07b7a169af0289eb7daaf53045b8aded72430ae8df39795501f"
+SECRET_42="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"
+
+# email
+EMAIL_SERVICE="hotmail"
+EMAIL_USER="transcendence1337@outlook.com"
+EMAIL_PASSWORD="ft_Transcendence12"
+FRONTEND_CONFIRM_EMAIL_URL="http://localhost:3000/redirect-email"
+FRONTEND_SET_PASSWORD_URL= "http://localhost:3000/change-password"
+
+# 2fa auth
+AUTH_APP_NAME="Transcendence"
+
+#cloudinary
+CLOUDINARY_NAME = "dxirz67e3"
+CLOUDINARY_API_KEY = "737155888747824"
+CLOUDINARY_API_SECRET = "khK2hb-Hxz9urktULRlS9La5o9U"
+
+#cloudinary default avatas
+AVATAR1 = "https://res.cloudinary.com/dxirz67e3/image/upload/v1694465594/cute-default.png"
+AVATAR2 = "https://res.cloudinary.com/dxirz67e3/image/upload/v1694465483/meme.png"
+AVATAR3 = "https://res.cloudinary.com/dxirz67e3/image/upload/v1694457651/serious.jpg"
+AVATAR4 = "https://res.cloudinary.com/dxirz67e3/image/upload/v1694465153/sad.png"

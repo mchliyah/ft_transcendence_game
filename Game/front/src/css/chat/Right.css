@@ -1,0 +1,93 @@
+:root {
+    --fakhti : #a435f0;
+    --white: #fff;
+    --black: #000;
+    --koki: #c56af0;
+}
+
+.typing-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    border-radius: 30px;
+    background-color: var(--koki);
+    height: 50px;
+    position: relative;
+    top: 90%;
+    color: var(--white) !important;
+    /* position: fixed; */
+    width: 100%;
+    margin-top: 30rem;
+}
+
+.typing-bar input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    font-size: 1.2rem;
+    color: var(--white) !important;
+}
+
+.typing-bar button i {
+    font-size: 1.5rem;
+    color: var(--white);
+}
+
+.typing-bar ::placeholder {
+    color: var(--white) !important;
+}
+
+.parentSender {
+   width: 100%;
+   display: flex;
+    justify-content: flex-end;
+
+}
+.parentReceiver {
+    width: 100%;
+    display: flex;
+     justify-content: flex-start;
+     flex-direction: column-reverse;
+ 
+ }
+.sender {
+    background-color: var(--fakhti);
+    color: var(--white);
+    border-radius: 50px 50px 10px 50px;
+    height: 40px;
+    padding: 10px 13px;
+    margin-bottom: 5px;
+    width: fit-content;
+    margin-top: 5px;
+    
+}
+
+.receiver {
+    background-color: #d4d9dd;
+    color: #808080;
+    border-radius: 50px 50px 50px 10px;
+    height: 40px;
+    padding: 10px 13px;
+    width: fit-content;
+    margin-bottom: 7px;
+}
+
+.recvRoom {
+    margin-left: 44px;
+    margin-top: -45px;
+    margin-bottom: 13px;
+}
+
+/* .chakra-menu__menu-list {
+    background-color: var(--fakhti);
+    color: var(--white);
+    border-radius: 50px 50px 10px 50px;
+    height: 40px;
+    padding: 10px 13px;
+    margin-bottom: 5px;
+    width: fit-content;
+} */

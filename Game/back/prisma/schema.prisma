@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email              String  @unique
+  isEmailConfirmed   Boolean @default(false)
+  username           String? @unique
+  hash               String?
+  avatar             String
+  login              String? @unique
+  isPasswordRequired Boolean @default(false)
+  is2FaEnabled       Boolean @default(false)
+  twoFaSecret        String?
+  is2FaVerified      Boolean @default(false)
+
+  sentMessages           Message[]       @relation("SentMessages")
+  receivedMessages       Message[]       @relation("ReceivedMessages")
+  sentInvitations        Invitation[]    @relation("InvitationSender")
+  sentFriendRequests     FriendRequest[] @relation("FriendRequestSender")
+  receivedInvitations    Invitation[]    @relation("InvitationReceiver")
+  receivedFriendRequests FriendRequest[] @relation("FriendRequestReceiver")
+  dmsList                User[]          @relation("DMSList")
+  dmsListof              User[]          @relation("DMSList")
+  friends                User[]          @relation("FriendList")
+  friendof               User[]          @relation("FriendList")
+  blocked                User[]          @relation("Blocked")
+  blockedBy              User[]          @relation("Blocked")
+  matchHistoryA          Match[]         @relation("MatchPlayerA")
+  matchHistoryB          Match[]         @relation("MatchPlayerB")
+  winningMatches         Match[]         @relation("MatchWinner")
+  achievements           Achievement[]   @relation("Achiever")
+  channels               Channel[]       @relation("ChannelParticipants")
+  ownedChannels          Channel[]       @relation("ChannelOwner")
+  adminChannels          Channel[]       @relation("ChannelAdmins")
+  bannedChannels         Channel[]       @relation("ChannelBanned")
+  mutedChannels          Channel[]       @relation("ChannelMuted")
+}
+
+model FriendRequest {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  status           String  @default("pending")
+  isReceiverOnline Boolean @default(false)
+
+  sender     User @relation("FriendRequestSender", fields: [senderId], references: [id])
+  senderId   Int
+  receiver   User @relation("FriendRequestReceiver", fields: [receiverId], references: [id])
+  receiverId Int
+}
+
+model Invitation {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  isReceiverOnline Boolean @default(false)
+  status           String  @default("pending")
+
+  sender     User    @relation("InvitationSender", fields: [senderId], references: [id])
+  senderId   Int
+  receiver   User    @relation("InvitationReceiver", fields: [receiverId], references: [id])
+  receiverId Int
+  channel    Channel @relation("ChannelInvitations", fields: [channelId], references: [id])
+  channelId  Int
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  content String
+  sentAt  DateTime
+
+  isDM      Boolean  @default(true)
+  isPending Boolean? @default(true)
+
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+  senderId   Int
+  receiver   User?    @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  receiverId Int?
+  channel    Channel? @relation("ChannelMessages", fields: [channelId], references: [id])
+  channelId  Int?
+}
+
+model Match {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  start  DateTime
+  end    DateTime?
+  result String
+
+  playerA   User? @relation("MatchPlayerA", fields: [playerAId], references: [id])
+  playerAId Int?
+  playerB   User? @relation("MatchPlayerB", fields: [playerBId], references: [id])
+  playerBId Int?
+  winner    User? @relation("MatchWinner", fields: [winnerId], references: [id])
+  winnerId  Int?
+}
+
+model Channel {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name      String  @unique
+  type      String  @default("public")
+  hash      String?
+  owner     User    @relation("ChannelOwner", fields: [ownerId], references: [id])
+  ownerId   Int
+  isDeleted Boolean @default(false)
+
+  messages     Message[]    @relation("ChannelMessages")
+  participants User[]       @relation("ChannelParticipants")
+  invitaions   Invitation[] @relation("ChannelInvitations")
+  admins       User[]       @relation("ChannelAdmins")
+  banned       User[]       @relation("ChannelBanned")
+  muted        User[]       @relation("ChannelMuted")
+}
+
+model Achievement {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name        String
+  icon        String
+  description String
+
+  achievers User[] @relation("Achiever")
+}

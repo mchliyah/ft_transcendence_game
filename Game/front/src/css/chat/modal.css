@@ -1,0 +1,12 @@
+.fileField {
+    border-radius: 50%;
+}
+
+#fila {
+    display: none !important;
+}
+
+.radioInput .form-check-input[type="radio"]:checked{
+    background-color: #a435f0 !important;
+    border-color: #a435f0 !important;
+}
